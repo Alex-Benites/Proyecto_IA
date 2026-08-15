@@ -1,0 +1,811 @@
+
+##############################################################################
+ETAPA 1 - INSPECCION DE DATASETS (no se modifica ni combina nada)
+##############################################################################
+Python  : 3.13.3
+pandas  : 2.3.1
+numpy   : 2.3.2
+
+Cargando A_2014_2025 desde mdi_homicidiosintencionales_pm_2014_2025.xlsx ...
+
+Cargando B_2026_ene_jun desde mdi_homicidiosintencionalse_pm_2026_enero_junio.xlsx ...
+
+##############################################################################
+DATASET A_2014_2025
+##############################################################################
+
+==============================================================================
+[A_2014_2025] 1. DIMENSIONES Y COLUMNAS
+==============================================================================
+Filas    : 39,821
+Columnas : 33
+Memoria  : 75.5 MB
+
+Listado de columnas (en orden):
+   1. tipo_muerte
+   2. zona
+   3. subzona
+   4. distrito
+   5. circuito
+   6. codigo_subcircuito
+   7. subcircuito
+   8. codigo_provincia
+   9. provincia
+  10. codigo_canton
+  11. canton
+  12. coordenada_y
+  13. coordenada_x
+  14. area_hecho
+  15. lugar
+  16. tipo_lugar
+  17. fecha_infraccion
+  18. hora_infraccion
+  19. arma
+  20. tipo_arma
+  21. presunta_motivacion
+  22. presun_motiva_observada
+  23. probable_causa_motivada
+  24. edad
+  25. medida_edad
+  26. sexo
+  27. genero
+  28. etnia
+  29. estado_civil
+  30. nacionalidad
+  31. discapacidad
+  32. profesion_registro_civil
+  33. instruccion
+
+==============================================================================
+[A_2014_2025] 2. PERFIL POR COLUMNA
+==============================================================================
+                 columna  nulos  %nulos  centinela  %centinela  unicos                                                         top2
+             tipo_muerte      0     0.0          0        0.00       4                           ASESINATO(35266) | HOMICIDIO(3423)
+                    zona      0     0.0          0        0.00       9                                 ZONA 8(12862) | ZONA 5(9648)
+                 subzona      0     0.0          0        0.00      26                         D.M. GUAYAQUIL(12862) | MANABÍ(4559)
+                distrito      0     0.0          0        0.00     140                         NUEVA PROSPERINA(2224) | DURÁN(1835)
+                circuito      0     0.0          0        0.00     933                                    GUASMO(660) | CENTRO(656)
+      codigo_subcircuito      0     0.0          0        0.00    1745                          09D07C07S02(571) | 09D10C03S01(339)
+             subcircuito      0     0.0          0        0.00    1609                       SAN FRANCISCO 2(571) | PROGRESO 1(350)
+        codigo_provincia      0     0.0          0        0.00      24                                         09(17000) | 13(4559)
+               provincia      0     0.0          0        0.00      24                                 GUAYAS(17000) | MANABÍ(4559)
+           codigo_canton      0     0.0          0        0.00     216                                     0901(10832) | 1701(2055)
+                  canton      0     0.0          0        0.00     214                               GUAYAQUIL(10832) | QUITO(2055)
+            coordenada_y      0     0.0          0        0.00   28864                                      0(1568) | -2,34938(175)
+            coordenada_x      0     0.0          0        0.00   27786                                     0(1567) | -79,31205(177)
+              area_hecho      0     0.0          0        0.00       2                                  URBANO(30506) | RURAL(9315)
+                   lugar      0     0.0          0        0.00     101                        VÍA PÚBLICA(24210) | CASA/VILLA(6159)
+              tipo_lugar      0     0.0          0        0.00       2                              PÚBLICO(27484) | PRIVADO(12337)
+        fecha_infraccion      0     0.0          0        0.00    4158           2021-09-28 00:00:00(129) | 2021-02-23 00:00:00(85)
+         hora_infraccion      0     0.0          5        0.01    1126                                22:00:00(999) | 20:00:00(969)
+                    arma      0     0.0          0        0.00       6                     ARMA DE FUEGO(31234) | ARMA BLANCA(5208)
+               tipo_arma      0     0.0       1616        4.06      53                              PISTOLA(20743) | REVOLVER(3037)
+     presunta_motivacion      0     0.0          1        0.00       8      DELINCUENCIA COMÚN(31929) | VIOLENCIA COMUNITARIA(5780)
+ presun_motiva_observada      0     0.0          1        0.00      35 AMENAZA(17755) | TRÁFICO INTERNO DE DROGAS (MICROTRÁFICO)(10
+ probable_causa_motivada      0     0.0          0        0.00      19 HERIDA POR ARMA DE FUEGO(31198) | HERIDA POR ARMA BLANCA(522
+                    edad      0     0.0        881        2.21      99                                          25(1815) | 30(1805)
+             medida_edad      0     0.0        881        2.21       2                                     A(38940) | SIN_DATO(881)
+                    sexo      0     0.0        162        0.41       3                                  HOMBRE(35908) | MUJER(3751)
+                  genero      0     0.0       6328       15.89       8                            MASCULINO(30434) | SIN_DATO(6328)
+                   etnia      0     0.0       1575        3.96      10                                MESTIZO/A(33555) | AFRO(2943)
+            estado_civil      0     0.0       3540        8.89       7                                SOLTERO(29960) | CASADO(4361)
+            nacionalidad      0     0.0       1348        3.39      41                        ECUADOR(36747) | NO DETERMINADO(1294)
+            discapacidad      0     0.0        892        2.24       9                         NINGUNA(38378) | NO DETERMINADO(826)
+profesion_registro_civil      0     0.0       6757       16.97      64                      ESTADO PERSONAL(16356) | SIN_DATO(6757)
+             instruccion      0     0.0      30175       75.78      10                               SIN_DATO(30175) | BASICA(3671)
+
+(guardado en resultados/inspeccion/perfil_columnas_A_2014_2025.csv)
+
+==============================================================================
+[A_2014_2025] 3. DUPLICADOS
+==============================================================================
+Filas identicas en TODAS las columnas : 187 (0.47%)
+
+OJO: en datos de homicidios, dos filas identicas pueden ser
+dos victimas distintas del mismo hecho (misma hora, mismo lugar,
+misma edad, mismo sexo). NO son necesariamente un error de carga.
+Esto hay que decidirlo en la Etapa 2, no ahora.
+
+Filas que repiten (fecha+hora+subcircuito+coordenadas): 5,298
+-> indicio de hechos con multiples victimas (masacres, ataques multiples)
+
+==============================================================================
+[A_2014_2025] 4. POSIBLES IDENTIFICADORES
+==============================================================================
+Buscamos columnas con cardinalidad muy alta (casi un valor por fila).
+Esas columnas permiten 'memorizar' registros -> riesgo de leakage.
+
+  ALTA CARDINALIDAD: coordenada_y -> 72.5% de valores unicos
+  ALTA CARDINALIDAD: coordenada_x -> 69.8% de valores unicos
+
+==============================================================================
+[A_2014_2025] 5. FECHAS Y COBERTURA TEMPORAL
+==============================================================================
+Fechas no parseables : 0
+Fecha minima         : 2014-01-01 00:00:00
+Fecha maxima         : 2025-12-31 00:00:00
+
+Registros por anio:
+  2014 :  1,310  #######
+  2015 :  1,050  #####
+  2016 :    959  #####
+  2017 :    970  #####
+  2018 :    996  #####
+  2019 :  1,189  ######
+  2020 :  1,371  #######
+  2021 :  2,495  #############
+  2022 :  4,886  ##########################
+  2023 :  8,248  ############################################
+  2024 :  7,065  ######################################
+  2025 :  9,282  ##################################################
+
+hora_infraccion -> nulos: 0, formatos distintos detectados: {8: 39821}
+
+==============================================================================
+[A_2014_2025] 6. VARIABLES POTENCIALMENTE NUMERICAS
+==============================================================================
+
+--- edad ---
+  no convertibles a numero : 881 (2.21%)
+  min / max                : 0.0 / 98.0
+  media / mediana          : 32.819 / 30.000
+  percentiles 1/25/50/75/99: [np.float64(12.0), np.float64(24.0), np.float64(30.0), np.float64(39.0), np.float64(73.0)]
+  valores no numericos frecuentes: {'SIN_DATO': 881}
+
+--- coordenada_x ---
+  no convertibles a numero : 0 (0.00%)
+  min / max                : -90.3371889 / 0.0
+  media / mediana          : -76.511 / -79.833
+  percentiles 1/25/50/75/99: [np.float64(-80.906), np.float64(-79.957), np.float64(-79.833), np.float64(-79.418), np.float64(0.0)]
+
+--- coordenada_y ---
+  no convertibles a numero : 0 (0.00%)
+  min / max                : -4.97405 / 1.42759
+  media / mediana          : -1.522 / -1.991
+  percentiles 1/25/50/75/99: [np.float64(-3.562), np.float64(-2.222), np.float64(-1.991), np.float64(-0.827), np.float64(1.009)]
+
+==============================================================================
+[A_2014_2025] 7. VARIABLES CATEGORICAS (distribuciones)
+==============================================================================
+
+--- tipo_muerte  (4 categorias distintas) ---
+   ASESINATO                                       35,266  88.56%
+   HOMICIDIO                                        3,423   8.60%
+   FEMICIDIO                                          867   2.18%
+   SICARIATO                                          265   0.67%
+
+--- arma  (6 categorias distintas) ---
+   ARMA DE FUEGO                                   31,234  78.44%
+   ARMA BLANCA                                      5,208  13.08%
+   OTROS                                            1,519   3.81%
+   ARMA CONTUNDENTE                                 1,131   2.84%
+   CONSTRICTORA                                       689   1.73%
+   SUSTANCIAS                                          40   0.10%
+
+--- tipo_arma  (53 categorias distintas) ---
+   PISTOLA                                         20,743  52.09%
+   REVOLVER                                         3,037   7.63%
+   CUCHILLO                                         2,720   6.83%
+   OTROS ARMA CORTA                                 2,301   5.78%
+   OTRO                                             1,996   5.01%
+   SIN_DATO                                         1,616   4.06%
+   NINGUNA                                          1,278   3.21%
+   FUSIL                                            1,073   2.69%
+   OTROS ARMA LARGA                                   912   2.29%
+   MACHETE                                            786   1.97%
+   OBJETO CONTUSO                                     717   1.80%
+   CORTO PUNZANTE                                     661   1.66%
+   CARTUCHERA                                         361   0.91%
+   PRENDA TEXTIL                                      263   0.66%
+   SOGA                                               183   0.46%
+   ESCOPETA                                           174   0.44%
+   ROCA                                               133   0.33%
+   PALO                                               132   0.33%
+   SUBAMETRALLADORA                                   122   0.31%
+   CUERDA                                             117   0.29%
+   HIDROCARBUROS                                       67   0.17%
+   CABLE                                               61   0.15%
+   CINTA DE EMBALAJE                                   39   0.10%
+   EXPLOSIVOS                                          33   0.08%
+   NAVAJA                                              32   0.08%
+   ... y 28 categorias mas
+
+--- area_hecho  (2 categorias distintas) ---
+   URBANO                                          30,506  76.61%
+   RURAL                                            9,315  23.39%
+
+--- tipo_lugar  (2 categorias distintas) ---
+   PÚBLICO                                         27,484  69.02%
+   PRIVADO                                         12,337  30.98%
+
+--- lugar  (101 categorias distintas) ---
+   VÍA PÚBLICA                                     24,210  60.80%
+   CASA/VILLA                                       6,159  15.47%
+   FINCA                                            1,250   3.14%
+   CENTROS DE REHABILITACIÓN SOCIAL                 1,017   2.55%
+   TERRENO BALDÍO                                     952   2.39%
+   RÍO                                                558   1.40%
+   HACIENDAS                                          497   1.25%
+   CANCHAS DE USO MÚLTIPLE                            339   0.85%
+   BARES                                              330   0.83%
+   MAR                                                325   0.82%
+   INTERIOR DE VEHÍCULO PARTICULAR                    308   0.77%
+   PARQUES Y PLAZAS                                   293   0.74%
+   HOSPITALES                                         265   0.67%
+   OTROS LOCALES COMERCIALES                          241   0.61%
+   QUEBRADAS                                          236   0.59%
+   RESTAURANTE                                        225   0.57%
+   BOSQUE Y RESERVAS ECOLÓGICAS                       219   0.55%
+   NIGHT CLUBS                                        184   0.46%
+   OTROS CENTROS DE DIVERSIÓN                         142   0.36%
+   MECÁNICAS                                          137   0.34%
+   LAGUNA - LAGO                                      127   0.32%
+   DISCOTECAS                                          87   0.22%
+   TRANSPORTE PÚBLICO                                  83   0.21%
+   GASOLINERAS                                         81   0.20%
+   SALA DE BELLEZA                                     78   0.20%
+   ... y 76 categorias mas
+
+--- presunta_motivacion  (8 categorias distintas) ---
+   DELINCUENCIA COMÚN                              31,929  80.18%
+   VIOLENCIA COMUNITARIA                            5,780  14.51%
+   VIOLENCIA INTRAFAMILIAR                          1,531   3.84%
+   TRANSNACIONAL                                      427   1.07%
+   TERRORISMO                                          62   0.16%
+   VIOLENCIA SEXUAL                                    46   0.12%
+   PSICOPATOLOGÍAS                                     45   0.11%
+   SIN_DATO                                             1   0.00%
+
+--- sexo  (3 categorias distintas) ---
+   HOMBRE                                          35,908  90.17%
+   MUJER                                            3,751   9.42%
+   NO DETERMINADO                                     162   0.41%
+
+--- genero  (8 categorias distintas) ---
+   MASCULINO                                       30,434  76.43%
+   SIN_DATO                                         6,328  15.89%
+   FEMENINO                                         2,729   6.85%
+   NO APLICA                                          271   0.68%
+   TRANSGENERO FEMENINO                                25   0.06%
+   TRANSGENERO                                         23   0.06%
+   TRANSEXUAL                                           7   0.02%
+   TRANSGENERO MASCULINO                                4   0.01%
+
+--- etnia  (10 categorias distintas) ---
+   MESTIZO/A                                       33,555  84.26%
+   AFRO                                             2,943   7.39%
+   NO DETERMINADO                                   1,368   3.44%
+   MULATO/A                                           405   1.02%
+   INDIGENA                                           368   0.92%
+   MONTUBIO/A                                         356   0.89%
+   OTROS                                              315   0.79%
+   BLANCO/A                                           282   0.71%
+   SIN_DATO                                           207   0.52%
+   ASIATICO/A                                          22   0.06%
+
+--- estado_civil  (7 categorias distintas) ---
+   SOLTERO                                         29,960  75.24%
+   CASADO                                           4,361  10.95%
+   NO DETERMINADO                                   3,487   8.76%
+   DIVORCIADO                                       1,269   3.19%
+   EN UNION DE HECHO                                  444   1.11%
+   VIUDO                                              247   0.62%
+   SIN_DATO                                            53   0.13%
+
+--- nacionalidad  (41 categorias distintas) ---
+   ECUADOR                                         36,747  92.28%
+   NO DETERMINADO                                   1,294   3.25%
+   VENEZUELA                                          724   1.82%
+   COLOMBIA                                           534   1.34%
+   OTROS                                              312   0.78%
+   PERU                                                61   0.15%
+   SIN_DATO                                            54   0.14%
+   CUBA                                                15   0.04%
+   CHINA POPULAR                                       12   0.03%
+   ESTADOS UNIDOS                                      10   0.03%
+   ARGENTINA                                            6   0.02%
+   RUSIA                                                5   0.01%
+   ALBANIA                                              4   0.01%
+   DOMINICA                                             4   0.01%
+   REPUBLICA DOMINICANA                                 3   0.01%
+   BRASIL                                               3   0.01%
+   NIGERIA                                              3   0.01%
+   MEXICO                                               2   0.01%
+   ESPAÑA                                               2   0.01%
+   CHILE                                                2   0.01%
+   CANADA                                               2   0.01%
+   JORDANIA                                             2   0.01%
+   FRANCIA                                              2   0.01%
+   SAMOA AMERICANA                                      1   0.00%
+   BANGLADESH                                           1   0.00%
+   ... y 16 categorias mas
+
+--- discapacidad  (9 categorias distintas) ---
+   NINGUNA                                         38,378  96.38%
+   NO DETERMINADO                                     826   2.07%
+   FISICA                                             276   0.69%
+   INTELECTUAL                                        103   0.26%
+   VISUAL                                              84   0.21%
+   SIN_DATO                                            66   0.17%
+   PSICOLOGICA                                         44   0.11%
+   AUDITIVA                                            31   0.08%
+   DE LENGUAJE                                         13   0.03%
+
+--- medida_edad  (2 categorias distintas) ---
+   A                                               38,940  97.79%
+   SIN_DATO                                           881   2.21%
+
+--- instruccion  (10 categorias distintas) ---
+   SIN_DATO                                        30,175  75.78%
+   BASICA                                           3,671   9.22%
+   BACHILLERATO                                     2,451   6.16%
+   PRIMARIA                                         1,456   3.66%
+   SECUNDARIA                                         735   1.85%
+   NINGUNA                                            533   1.34%
+   INICIAL                                            429   1.08%
+   SUPERIOR                                           282   0.71%
+   ELEMENTAL                                           79   0.20%
+   ESPECIAL                                            10   0.03%
+
+--- zona  (9 categorias distintas) ---
+   ZONA 8                                          12,862  32.30%
+   ZONA 5                                           9,648  24.23%
+   ZONA 4                                           5,469  13.73%
+   ZONA 1                                           3,529   8.86%
+   ZONA 7                                           3,206   8.05%
+   ZONA 9                                           2,055   5.16%
+   ZONA 6                                           1,323   3.32%
+   ZONA 3                                             918   2.31%
+   ZONA 2                                             811   2.04%
+
+==============================================================================
+[A_2014_2025] 8. RELACION arma <-> tipo_arma <-> probable_causa
+==============================================================================
+Tabla cruzada arma x tipo_arma (conteos):
+tipo_arma         ACIDOS  AGROQUIMICO  ALCOHOL  AMETRALLADORA  BARRA  BATE  BISTURI  CABLE  CADENA  CARABINA  CARTUCHERA  CINTA DE EMBALAJE  CORREA  CORTO PUNZANTE  CUCHILLO  CUERDA  DAGA  DESTORNILLADOR  DROGAS ADICTIVAS  ELECTRICIDAD  ESCOPETA  ESCOPOLAMINA  EXPLOSIVOS  FARMACOS  FUNDA  FUSIL  GARROTE  HACHA  HIDROCARBUROS  HOJA DE AFEITAR  LANZA  MACHETE  MARTILLO  NATURAL TOXICA  NAVAJA  NINGUNA  OBJETO CONTUSO  OTRO  OTROS ARMA CORTA  OTROS ARMA LARGA  PALO  PICA HIELO  PISTOLA  PRENDA TEXTIL  PUÑAL  REPETIDORA  REVOLVER  ROCA  SIN_DATO  SOGA  SUBAMETRALLADORA  TIJERAS  VENENO
+arma                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+ARMA BLANCA            0            0        0              0      0     0        1      0       0         0           0                  0       0             661      2720       0     5              16                 0             0         0             0           0         0      0      0        0      1              0                1      2      786         0               0      32        0               0   479                 0                 0     0           8        0              0     20           0         0     0       467     0                 0        9       0
+ARMA CONTUNDENTE       0            0        0              0     20    11        0      0       0         0           0                  0       0               0         0       0     0               0                 0             0         0             0           0         0      0      0       10      0              0                0      0        0        21               0       0        0             717     1                 0                 0   132           0        0              0      0           0         0   133        86     0                 0        0       0
+ARMA DE FUEGO          0            0        0              7      0     0        0      0       0        19         361                  0       0               0         0       0     0               0                 0             0       174             0           0         0      0   1073        0      0              0                0      0        0         0               0       0        2               0  1515              2301               912     0           0    20743              0      0          31      3037     0       937     0               122        0       0
+CONSTRICTORA           0            0        0              0      0     0        0     61       3         0           0                  0      15               0         0     117     0               0                 0             0         0             0           0         0      0      0        0      0              0                0      0        0         0               0       0        0               0     1                 0                 0     0           0        0            263      0           0         0     0        46   183                 0        0       0
+OTROS                  3            0        0              0      0     0        0      0       0         0           0                 39       0               0         0       0     0               0                 0             3         0             0          33         0     19      0        0      0             67                0      0        0         0               0       0     1276               0     0                 0                 0     0           0        0              0      0           0         0     0        79     0                 0        0       0
+SUSTANCIAS             0            7        1              0      0     0        0      0       0         0           0                  0       0               0         0       0     0               0                 1             0         0             2           0         7      0      0        0      0              0                0      0        0         0               1       0        0               0     0                 0                 0     0           0        0              0      0           0         0     0         1     0                 0        0      20
+
+Lectura: si cada 'arma' mapea a un conjunto EXCLUSIVO de 'tipo_arma',
+entonces una columna determina a la otra -> LEAKAGE si predecimos una
+usando la otra como feature.
+
+##############################################################################
+DATASET B_2026_ene_jun
+##############################################################################
+
+==============================================================================
+[B_2026_ene_jun] 1. DIMENSIONES Y COLUMNAS
+==============================================================================
+Filas    : 4,154
+Columnas : 33
+Memoria  : 7.8 MB
+
+Listado de columnas (en orden):
+   1. tipo_muerte
+   2. zona
+   3. subzona
+   4. distrito
+   5. circuito
+   6. codigo_subcircuito
+   7. subcircuito
+   8. codigo_provincia
+   9. provincia
+  10. codigo_canton
+  11. canton
+  12. coordenada_y
+  13. coordenada_x
+  14. area_hecho
+  15. lugar
+  16. tipo_lugar
+  17. fecha_infraccion
+  18. hora_infraccion
+  19. arma
+  20. tipo_arma
+  21. presunta_motivacion
+  22. presun_motiva_observada
+  23. probable_causa_motivada
+  24. edad
+  25. medida_edad
+  26. sexo
+  27. genero
+  28. etnia
+  29. estado_civil
+  30. nacionalidad
+  31. discapacidad
+  32. profesion_registro_civil
+  33. instruccion
+
+==============================================================================
+[B_2026_ene_jun] 2. PERFIL POR COLUMNA
+==============================================================================
+                 columna  nulos  %nulos  centinela  %centinela  unicos                                                         top2
+             tipo_muerte      0     0.0          0        0.00       4                             ASESINATO(3946) | HOMICIDIO(158)
+                    zona      0     0.0          0        0.00       9                                  ZONA 8(1322) | ZONA 5(1050)
+                 subzona      0     0.0          0        0.00      25                           D.M. GUAYAQUIL(1322) | MANABÍ(581)
+                distrito      0     0.0          0        0.00     117                                    MANTA(253) | MACHALA(223)
+                circuito      0     0.0          0        0.00     547                                   CENTRO(55) | PASCUALES(55)
+      codigo_subcircuito      0     0.0          0        0.00     892                            03D03C02S01(35) | 09D07C07S02(34)
+             subcircuito      0     0.0          0        0.00     850                        SAN JUAN 1(39) | TRONCAL CENTRO 1(35)
+        codigo_provincia      0     0.0          0        0.00      23                                           09(1761) | 13(581)
+               provincia      0     0.0          0        0.00      23                                   GUAYAS(1761) | MANABÍ(581)
+           codigo_canton      0     0.0          0        0.00     140                                       0901(1098) | 0701(223)
+                  canton      0     0.0          0        0.00     139                               GUAYAQUIL(1098) | MACHALA(223)
+            coordenada_y      0     0.0          0        0.00    3273                                  -2,34938(29) | -2,05292(14)
+            coordenada_x      0     0.0          0        0.00    3254                                -79,31205(29) | -79,94452(12)
+              area_hecho      0     0.0          1        0.02       3                                    URBANO(3193) | RURAL(960)
+                   lugar      0     0.0          0        0.00      66                          VÍA PÚBLICA(2672) | CASA/VILLA(663)
+              tipo_lugar      0     0.0          0        0.00       2                                PUBLICO(2980) | PRIVADO(1174)
+        fecha_infraccion      0     0.0          0        0.00     181            2026-03-28 00:00:00(50) | 2026-05-31 00:00:00(49)
+         hora_infraccion      0     0.0          0        0.00     559                                20:00:00(122) | 22:00:00(104)
+                    arma      0     0.0          0        0.00       6                       ARMA DE FUEGO(3671) | ARMA BLANCA(313)
+               tipo_arma      0     0.0          0        0.00      30                        PISTOLA(2963) | OTROS ARMA CORTA(306)
+     presunta_motivacion      0     0.0          0        0.00       7        DELINCUENCIA COMÚN(4001) | VIOLENCIA COMUNITARIA(113)
+ presun_motiva_observada      0     0.0          0        0.00      25 AMENAZA(3037) | TRÁFICO INTERNOS DE DROGAS (MICROTRÁFICO)(75
+ probable_causa_motivada      0     0.0          0        0.00      14 HERIDA POR ARMA DE FUEGO(3669) | HERIDA POR ARMA BLANCA(315)
+                    edad      0     0.0        109        2.62      84                                            25(201) | 24(184)
+             medida_edad      0     0.0        109        2.62       2                                      A(4045) | SIN_DATO(109)
+                    sexo      0     0.0         13        0.31       3                                    HOMBRE(3782) | MUJER(359)
+                  genero      0     0.0          6        0.14       9                              MASCULINO(3769) | FEMENINO(347)
+                   etnia      0     0.0        221        5.32       9                              MESTIZO/A(3596) | SIN_DATO(221)
+            estado_civil      0     0.0        453       10.91       6                                SOLTERO(3200) | SIN_DATO(453)
+            nacionalidad      0     0.0        212        5.10       7                                ECUADOR(3753) | SIN_DATO(212)
+            discapacidad      0     0.0         19        0.46       8                              NINGUNA(4092) | INTELECTUAL(19)
+profesion_registro_civil      0     0.0        775       18.66      58                        ESTADO PERSONAL(1704) | SIN_DATO(775)
+             instruccion      0     0.0       3742       90.08       9                                 SIN_DATO(3742) | BASICA(176)
+
+(guardado en resultados/inspeccion/perfil_columnas_B_2026_ene_jun.csv)
+
+==============================================================================
+[B_2026_ene_jun] 3. DUPLICADOS
+==============================================================================
+Filas identicas en TODAS las columnas : 32 (0.77%)
+
+OJO: en datos de homicidios, dos filas identicas pueden ser
+dos victimas distintas del mismo hecho (misma hora, mismo lugar,
+misma edad, mismo sexo). NO son necesariamente un error de carga.
+Esto hay que decidirlo en la Etapa 2, no ahora.
+
+Filas que repiten (fecha+hora+subcircuito+coordenadas): 678
+-> indicio de hechos con multiples victimas (masacres, ataques multiples)
+
+==============================================================================
+[B_2026_ene_jun] 4. POSIBLES IDENTIFICADORES
+==============================================================================
+Buscamos columnas con cardinalidad muy alta (casi un valor por fila).
+Esas columnas permiten 'memorizar' registros -> riesgo de leakage.
+
+  ALTA CARDINALIDAD: coordenada_y -> 78.8% de valores unicos
+  ALTA CARDINALIDAD: coordenada_x -> 78.3% de valores unicos
+
+==============================================================================
+[B_2026_ene_jun] 5. FECHAS Y COBERTURA TEMPORAL
+==============================================================================
+Fechas no parseables : 0
+Fecha minima         : 2026-01-01 00:00:00
+Fecha maxima         : 2026-06-30 00:00:00
+
+Registros por anio:
+  2026 :  4,154  ##################################################
+
+hora_infraccion -> nulos: 0, formatos distintos detectados: {8: 4154}
+
+==============================================================================
+[B_2026_ene_jun] 6. VARIABLES POTENCIALMENTE NUMERICAS
+==============================================================================
+
+--- edad ---
+  no convertibles a numero : 109 (2.62%)
+  min / max                : 0.0 / 89.0
+  media / mediana          : 31.571 / 29.000
+  percentiles 1/25/50/75/99: [np.float64(14.0), np.float64(23.0), np.float64(29.0), np.float64(39.0), np.float64(68.0)]
+  valores no numericos frecuentes: {'SIN_DATO': 109}
+
+--- coordenada_x ---
+  no convertibles a numero : 0 (0.00%)
+  min / max                : -80.97229 / -76.4849
+  media / mediana          : -79.748 / -79.903
+  percentiles 1/25/50/75/99: [np.float64(-80.912), np.float64(-79.989), np.float64(-79.903), np.float64(-79.559), np.float64(-76.875)]
+
+--- coordenada_y ---
+  no convertibles a numero : 0 (0.00%)
+  min / max                : -4.92867 / 1.28902
+  media / mediana          : -1.746 / -2.079
+  percentiles 1/25/50/75/99: [np.float64(-3.583), np.float64(-2.235), np.float64(-2.079), np.float64(-1.006), np.float64(0.967)]
+
+==============================================================================
+[B_2026_ene_jun] 7. VARIABLES CATEGORICAS (distribuciones)
+==============================================================================
+
+--- tipo_muerte  (4 categorias distintas) ---
+   ASESINATO                                        3,946  94.99%
+   HOMICIDIO                                          158   3.80%
+   FEMICIDIO                                           30   0.72%
+   SICARIATO                                           20   0.48%
+
+--- arma  (6 categorias distintas) ---
+   ARMA DE FUEGO                                    3,671  88.37%
+   ARMA BLANCA                                        313   7.53%
+   OTROS                                               85   2.05%
+   ARMA CONTUNDENTE                                    49   1.18%
+   CONSTRICTORA                                        33   0.79%
+   SUSTANCIAS                                           3   0.07%
+
+--- tipo_arma  (30 categorias distintas) ---
+   PISTOLA                                          2,963  71.33%
+   OTROS ARMA CORTA                                   306   7.37%
+   CUCHILLO                                           137   3.30%
+   REVOLVER                                           127   3.06%
+   FUSIL                                              122   2.94%
+   OTRO                                               102   2.46%
+   OTROS ARMA LARGA                                    83   2.00%
+   NINGUNA                                             77   1.85%
+   MACHETE                                             69   1.66%
+   CORTO PUNZANTE                                      63   1.52%
+   OBJETO CONTUSO                                      35   0.84%
+   SOGA                                                11   0.26%
+   PRENDA TEXTIL                                       11   0.26%
+   CARTUCHERA                                           7   0.17%
+   PALO                                                 7   0.17%
+   CABLE                                                6   0.14%
+   ROCA                                                 5   0.12%
+   FUNDA                                                4   0.10%
+   CUERDA                                               3   0.07%
+   HIDROCARBUROS                                        3   0.07%
+   VENENO                                               3   0.07%
+   MARTILLO                                             2   0.05%
+   CINTA DE EMBALAJE                                    1   0.02%
+   DESTORNILLADOR                                       1   0.02%
+   HACHA                                                1   0.02%
+   ... y 5 categorias mas
+
+--- area_hecho  (3 categorias distintas) ---
+   URBANO                                           3,193  76.87%
+   RURAL                                              960  23.11%
+   SIN_DATO                                             1   0.02%
+
+--- tipo_lugar  (2 categorias distintas) ---
+   PUBLICO                                          2,980  71.74%
+   PRIVADO                                          1,174  28.26%
+
+--- lugar  (66 categorias distintas) ---
+   VÍA PÚBLICA                                      2,672  64.32%
+   CASA/VILLA                                         663  15.96%
+   FINCA                                               81   1.95%
+   TERRENO BALDIO                                      77   1.85%
+   MAR                                                 55   1.32%
+   CENTROS DE REHABILITACIÓN SOCIAL                    53   1.28%
+   CANCHAS DE USO MÚLTIPLE                             46   1.11%
+   BARES                                               39   0.94%
+   HACIENDAS                                           38   0.91%
+   INTERIOR DE VEHÍCULO PARTICULAR                     35   0.84%
+   PARQUES Y PLAZAS                                    33   0.79%
+   RESTAURANTE                                         31   0.75%
+   RÍO                                                 30   0.72%
+   OTROS LOCALES COMERCIALES                           29   0.70%
+   MECÁNICAS                                           26   0.63%
+   NIGHT CLUBS                                         17   0.41%
+   PLAYA                                               14   0.34%
+   TRANSPORTE PÚBLICO                                  14   0.34%
+   LICORERÍAS                                          13   0.31%
+   QUEBRADAS                                           12   0.29%
+   OTROS CENTROS DE DIVERSIÓN                          11   0.26%
+   LAGUNA - LAGO                                       10   0.24%
+   BOSQUE Y RESERVAS ECOLÓGICAS                        10   0.24%
+   GASOLINERAS                                         10   0.24%
+   MERCADOS                                             8   0.19%
+   ... y 41 categorias mas
+
+--- presunta_motivacion  (7 categorias distintas) ---
+   DELINCUENCIA COMÚN                               4,001  96.32%
+   VIOLENCIA COMUNITARIA                              113   2.72%
+   VIOLENCIA INTRAFAMILIAR                             35   0.84%
+   PSICOPATOLOGÍAS                                      2   0.05%
+   TERRORISMO                                           1   0.02%
+   VIOLENCIA SEXUAL                                     1   0.02%
+   TRANSNACIONAL                                        1   0.02%
+
+--- sexo  (3 categorias distintas) ---
+   HOMBRE                                           3,782  91.04%
+   MUJER                                              359   8.64%
+   NO DETERMINADO                                      13   0.31%
+
+--- genero  (9 categorias distintas) ---
+   MASCULINO                                        3,769  90.73%
+   FEMENINO                                           347   8.35%
+   NO APLICA                                           18   0.43%
+   SIN_DATO                                             6   0.14%
+   TRANSGENERO FEMENINO                                 4   0.10%
+   TRANSGENERO                                          4   0.10%
+   TRANSGENERO MASCULINO                                3   0.07%
+   NO BINARIO                                           2   0.05%
+   TRANSEXUAL                                           1   0.02%
+
+--- etnia  (9 categorias distintas) ---
+   MESTIZO/A                                        3,596  86.57%
+   SIN_DATO                                           221   5.32%
+   AFRO                                               218   5.25%
+   OTROS                                               53   1.28%
+   MULATO/A                                            25   0.60%
+   MONTUBIO/A                                          15   0.36%
+   INDIGENA                                            14   0.34%
+   BLANCO/A                                            11   0.26%
+   ASIATICO/A                                           1   0.02%
+
+--- estado_civil  (6 categorias distintas) ---
+   SOLTERO                                          3,200  77.03%
+   SIN_DATO                                           453  10.91%
+   CASADO                                             337   8.11%
+   DIVORCIADO                                         122   2.94%
+   EN UNION DE HECHO                                   22   0.53%
+   VIUDO                                               20   0.48%
+
+--- nacionalidad  (7 categorias distintas) ---
+   ECUADOR                                          3,753  90.35%
+   SIN_DATO                                           212   5.10%
+   VENEZUELA                                           86   2.07%
+   COLOMBIA                                            54   1.30%
+   OTROS                                               42   1.01%
+   PERU                                                 6   0.14%
+   CHINA POPULAR                                        1   0.02%
+
+--- discapacidad  (8 categorias distintas) ---
+   NINGUNA                                          4,092  98.51%
+   INTELECTUAL                                         19   0.46%
+   SIN_DATO                                            19   0.46%
+   FISICA                                              13   0.31%
+   PSICOLOGICA                                          4   0.10%
+   VISUAL                                               4   0.10%
+   AUDITIVA                                             2   0.05%
+   DE LENGUAJE                                          1   0.02%
+
+--- medida_edad  (2 categorias distintas) ---
+   A                                                4,045  97.38%
+   SIN_DATO                                           109   2.62%
+
+--- instruccion  (9 categorias distintas) ---
+   SIN_DATO                                         3,742  90.08%
+   BASICA                                             176   4.24%
+   BACHILLERATO                                       114   2.74%
+   PRIMARIA                                            38   0.91%
+   SECUNDARIA                                          30   0.72%
+   INICIAL                                             21   0.51%
+   NINGUNA                                             19   0.46%
+   SUPERIOR                                            12   0.29%
+   ELEMENTAL                                            2   0.05%
+
+--- zona  (9 categorias distintas) ---
+   ZONA 8                                           1,322  31.82%
+   ZONA 5                                           1,050  25.28%
+   ZONA 4                                             618  14.88%
+   ZONA 7                                             550  13.24%
+   ZONA 1                                             266   6.40%
+   ZONA 9                                             119   2.86%
+   ZONA 2                                              87   2.09%
+   ZONA 6                                              82   1.97%
+   ZONA 3                                              60   1.44%
+
+==============================================================================
+[B_2026_ene_jun] 8. RELACION arma <-> tipo_arma <-> probable_causa
+==============================================================================
+Tabla cruzada arma x tipo_arma (conteos):
+tipo_arma         CABLE  CADENA  CARABINA  CARTUCHERA  CINTA DE EMBALAJE  CORREA  CORTO PUNZANTE  CUCHILLO  CUERDA  DESTORNILLADOR  ESCOPETA  FUNDA  FUSIL  HACHA  HIDROCARBUROS  MACHETE  MARTILLO  NINGUNA  OBJETO CONTUSO  OTRO  OTROS ARMA CORTA  OTROS ARMA LARGA  PALO  PISTOLA  PRENDA TEXTIL  REVOLVER  ROCA  SOGA  SUBAMETRALLADORA  VENENO
+arma                                                                                                                                                                                                                                                                                                                                                
+ARMA BLANCA           0       0         0           0                  0       0              63       137       0               1         0      0      0      1              0       69         0        0               0    42                 0                 0     0        0              0         0     0     0                 0       0
+ARMA CONTUNDENTE      0       0         0           0                  0       0               0         0       0               0         0      0      0      0              0        0         2        0              35     0                 0                 0     7        0              0         0     5     0                 0       0
+ARMA DE FUEGO         0       0         1           7                  0       0               0         0       0               0         1      0    122      0              0        0         0        0               0    60               306                83     0     2963              0       127     0     0                 1       0
+CONSTRICTORA          6       1         0           0                  0       1               0         0       3               0         0      0      0      0              0        0         0        0               0     0                 0                 0     0        0             11         0     0    11                 0       0
+OTROS                 0       0         0           0                  1       0               0         0       0               0         0      4      0      0              3        0         0       77               0     0                 0                 0     0        0              0         0     0     0                 0       0
+SUSTANCIAS            0       0         0           0                  0       0               0         0       0               0         0      0      0      0              0        0         0        0               0     0                 0                 0     0        0              0         0     0     0                 0       3
+
+Lectura: si cada 'arma' mapea a un conjunto EXCLUSIVO de 'tipo_arma',
+entonces una columna determina a la otra -> LEAKAGE si predecimos una
+usando la otra como feature.
+
+##############################################################################
+9. COMPARACION ENTRE LOS DOS DATASETS (sin combinarlos)
+##############################################################################
+A_2014_2025: 39,821 filas x 33 columnas
+B_2026_ene_jun: 4,154 filas x 33 columnas
+
+--- 9.1 Nombres de columnas ---
+IDENTICAS en nombre y ORDEN.
+
+--- 9.2 Categorias presentes en uno y no en el otro ---
+(esto rompe la codificacion si combinamos sin normalizar)
+
+  [subzona]
+     solo en A_2014_2025 (1): ['GALÁPAGOS']
+
+  [distrito]
+     solo en A_2014_2025 (24): ['AGUARICO', 'ALAUSÍ', 'ARAJUNO', 'CATACOCHA', 'CHILLANES', 'COLTA', 'ESPEJO', 'GALÁPAGOS', 'GIRÓN', 'NABÓN', 'NANEGAL', 'PALLATANGA']
+     solo en B_2026_ene_jun (1): ['PUEBLOVIEJO']
+
+  [codigo_provincia]
+     solo en A_2014_2025 (1): ['20']
+
+  [provincia]
+     solo en A_2014_2025 (1): ['GALÁPAGOS']
+
+  [area_hecho]
+     solo en B_2026_ene_jun (1): ['SIN_DATO']
+
+  [lugar]
+     solo en A_2014_2025 (37): ['AGENCIA DE VIAJES', 'AGENCIAS DE REGULACIÓN Y CONTROL', 'ALMACENES', 'BANCOS', 'CABINAS/CENTROS DE INTERNET', 'CAFETERÍAS', 'CASAS DE CAMBIO - EMPEÑO', 'CENTROS DE CAPACITACIÓN Y FORMACIÓN', 'CENTROS INFANTILES', 'CENTROS Y SUBCENTROS DE SALUD', 'CLÍNICAS', 'COLEGIOS']
+     solo en B_2026_ene_jun (2): ['FERIA DE VEHICULOS', 'TERRENO BALDIO']
+
+  [tipo_lugar]
+     solo en A_2014_2025 (1): ['PÚBLICO']
+     solo en B_2026_ene_jun (1): ['PUBLICO']
+
+  [tipo_arma]
+     solo en A_2014_2025 (23): ['ACIDOS', 'AGROQUIMICO', 'ALCOHOL', 'AMETRALLADORA', 'BARRA', 'BATE', 'BISTURI', 'DAGA', 'DROGAS ADICTIVAS', 'ELECTRICIDAD', 'ESCOPOLAMINA', 'EXPLOSIVOS']
+
+  [presunta_motivacion]
+     solo en A_2014_2025 (1): ['SIN_DATO']
+
+  [presun_motiva_observada]
+     solo en A_2014_2025 (13): ['CONTRABANDO', 'EVASIÓN DE LA JUSTICIA', 'LITIGIO DE BIENES', 'RECEPTACIÓN ILEGAL (CACHINERIA)', 'ROBO A ENTIDADES FINANCIERAS', 'ROBO DE BIENES PATRIMONIALES', 'SECUESTRO', 'SIN_DATO', 'TRATA DE PERSONAS', 'TRÁFICO INTERNACIONAL DE DROGA', 'TRÁFICO INTERNO DE DROGAS (MICROTRÁFICO)', 'TRÁFICOS DE MIGRANTES']
+     solo en B_2026_ene_jun (3): ['EVASION DE LA JUSTICIA', 'TRÁFICO INTERNOS DE DROGAS (MICROTRÁFICO)', 'VIOLACION FAMILIAR DIRECTO (PERSONA CONOCIDA)']
+
+  [probable_causa_motivada]
+     solo en A_2014_2025 (5): ['ABORTO', 'APLASTAMIENTO', 'ELECTROCUCION', 'ENFERMEDAD', 'EXPLOSION']
+
+  [edad]
+     solo en A_2014_2025 (15): ['5', '72', '83', '85', '86', '87', '9', '90', '91', '92', '93', '94']
+
+  [genero]
+     solo en B_2026_ene_jun (1): ['NO BINARIO']
+
+  [etnia]
+     solo en A_2014_2025 (1): ['NO DETERMINADO']
+
+  [estado_civil]
+     solo en A_2014_2025 (1): ['NO DETERMINADO']
+
+  [nacionalidad]
+     solo en A_2014_2025 (34): ['ALBANIA', 'ALEMANIA', 'ANGOLA', 'ANTARTIDA', 'ARGENTINA', 'BANGLADESH', 'BELARUS', 'BOLIVIA', 'BRASIL', 'BURKINA FASO', 'CANADA', 'CHILE']
+
+  [discapacidad]
+     solo en A_2014_2025 (1): ['NO DETERMINADO']
+
+  [profesion_registro_civil]
+     solo en A_2014_2025 (24): ['AGENTE COMERCIAL', 'AGENTE ESPECIAL', 'BACH.TEC.SER.ADMON.S', 'BACH.TEC.SER.APL.I', 'BACH.TÉC.UNIVAL.CONT', 'BACHILLER ARTE', 'CAMAROGRAFO', 'CARROCEROS', 'DISENAD DE INTERIOR.', 'DOCTOR -MEDICO', 'DOCTOR -MÉDICO', 'DOCTORA - CIENCIAS']
+     solo en B_2026_ene_jun (18): ['BACH.TEC.ECOTURISMO', 'BIOLOGO', 'CAJERO', 'DIGITADOR', 'DIPLOMATICO', 'DR. ADMINISTRACION', 'ESP.DERECHO.PENAL', 'FARMACEUTICO', 'IMPORTADOR', 'ING DISEÑ.DIGI.MULTI', 'ING. COMERCIAL ADMINI', 'LIC. CONTADOR PUBLICO']
+
+  [instruccion]
+     solo en A_2014_2025 (1): ['ESPECIAL']
+
+--- 9.3 Diferencias por acentos / mayusculas (mismo concepto, texto distinto) ---
+  [lugar] 'TERRENO BALDÍO' (A)  vs  'TERRENO BALDIO' (B)  -> mismo concepto
+  [tipo_lugar] 'PÚBLICO' (A)  vs  'PUBLICO' (B)  -> mismo concepto
+  [presun_motiva_observada] 'EVASIÓN DE LA JUSTICIA' (A)  vs  'EVASION DE LA JUSTICIA' (B)  -> mismo concepto
+  [presun_motiva_observada] 'VIOLACIÓN FAMILIAR DIRECTO (PERSONA CONOCIDA)' (A)  vs  'VIOLACION FAMILIAR DIRECTO (PERSONA CONOCIDA)' (B)  -> mismo concepto
+
+--- 9.4 Solapamiento temporal ---
+  A_2014_2025: 2014-01-01 00:00:00  ->  2025-12-31 00:00:00
+  B_2026_ene_jun: 2026-01-01 00:00:00  ->  2026-06-30 00:00:00
+  NO hay solapamiento: los periodos son consecutivos y disjuntos.
+
+--- 9.5 Distribucion de 'arma' en cada dataset (comparacion de proporciones) ---
+                  %A_2014_2025  %B_2026_ene_jun  diff
+arma                                                 
+ARMA DE FUEGO            78.44            88.37  9.93
+ARMA BLANCA              13.08             7.53 -5.55
+OTROS                     3.81             2.05 -1.76
+ARMA CONTUNDENTE          2.84             1.18 -1.66
+CONSTRICTORA              1.73             0.79 -0.94
+SUSTANCIAS                0.10             0.07 -0.03
+
+Si las proporciones cambian mucho -> DRIFT: el fenomeno cambia en el tiempo.
+Eso es informacion clave para decidir la division train/test temporal.
+
+##############################################################################
+FIN DE LA INSPECCION
+##############################################################################
+No se combino nada. No se entreno nada. No se modifico ningun archivo.

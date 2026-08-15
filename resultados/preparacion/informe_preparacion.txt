@@ -1,0 +1,62 @@
+
+##############################################################################
+ETAPA 3 - PREPARACION
+##############################################################################
+Python 3.13.3 | pandas 2.3.1 | numpy 2.3.2 | scikit-learn 1.8.0 | semilla 42
+
+Entrada: data/processed/dataset.xlsx -> 20,901 filas x 27 columnas
+ADVERTENCIA (documentada, decision del usuario): este dataset contiene
+filas fabricadas para balancear ARMA_CONTUNDENTE (77.3%) y OTRAS (68.9%).
+Ver docstring del script para el detalle de la verificacion.
+
+Columnas eliminadas para modelado: ['arma_categoria', 'coordenada_x', 'coordenada_y', 'fecha', 'subzona', 'distrito', 'anio']
+  [presunta_motivacion] 1 nulos -> 'DESCONOCIDO'
+  [presun_motiva_observada] 1 nulos -> 'DESCONOCIDO'
+  [sexo] 150 nulos -> 'DESCONOCIDO'
+  [etnia] 1155 nulos -> 'DESCONOCIDO'
+  [estado_civil] 2263 nulos -> 'DESCONOCIDO'
+  [nacionalidad] 1036 nulos -> 'DESCONOCIDO'
+  [discapacidad] 453 nulos -> 'DESCONOCIDO'
+  [hora] 3 nulos -> 'DESCONOCIDO'
+  [franja_horaria] 3 nulos -> 'DESCONOCIDO'
+
+Features finales (19): ['zona', 'provincia', 'canton', 'area_hecho', 'lugar', 'tipo_lugar', 'presunta_motivacion', 'presun_motiva_observada', 'sexo', 'etnia', 'estado_civil', 'nacionalidad', 'discapacidad', 'mes', 'dia_semana', 'hora', 'franja_horaria', 'edad', 'es_fin_semana']
+Target: y  -> clases: ['ARMA_BLANCA', 'ARMA_CONTUNDENTE', 'ARMA_FUEGO', 'OTRAS']
+
+==============================================================================
+SPLIT (aleatorio estratificado, semilla=42)
+==============================================================================
+
+  train: 14,630 filas (70.0%)
+       ARMA_BLANCA        26.41%
+       ARMA_CONTUNDENTE   24.78%
+       ARMA_FUEGO         24.55%
+       OTRAS              24.25%
+
+  val: 3,135 filas (15.0%)
+       ARMA_BLANCA        26.41%
+       ARMA_CONTUNDENTE   24.78%
+       ARMA_FUEGO         24.53%
+       OTRAS              24.27%
+
+  test: 3,136 filas (15.0%)
+       ARMA_BLANCA        26.43%
+       ARMA_CONTUNDENTE   24.78%
+       ARMA_FUEGO         24.55%
+       OTRAS              24.23%
+
+==============================================================================
+PREPROCESADOR (ajustado SOLO con train)
+==============================================================================
+  Mediana de 'edad' en train (usada para imputar NaN): 30.0
+  Nulos de 'edad' en train: 410 de 14630
+
+  Dimension tras codificar (one-hot): 475 columnas
+  (1 numericas + 473 dummies + 1 binaria)
+
+##############################################################################
+FIN DE LA ETAPA 3
+##############################################################################
+Guardado: data/processed/{train,val,test}_raw.csv
+Guardado: data/processed/{train,val,test}_X.npy y _y.npy
+Guardado: modelos/preprocesador.joblib

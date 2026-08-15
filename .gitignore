@@ -1,0 +1,55 @@
+# ---------------------------------------------------------------------------
+# ARCHIVOS GENERADOS - no se suben porque son REGENERABLES y pesados.
+#
+# Cualquiera puede recrearlos corriendo:
+#     python 03_preparacion.py      -> los .npy y el preprocesador
+#     python 04/07/08_modelo_*.py   -> los modelos entrenados
+#
+# El pipeline es determinista (SEMILLA=42), asi que todos obtienen
+# exactamente los mismos archivos. Verificado por hash MD5.
+# ---------------------------------------------------------------------------
+
+# Matrices de features (train_X.npy solo pesa 54 MB)
+data/processed/*.npy
+
+# Splits intermedios en texto (regenerables por 03_preparacion.py)
+data/processed/train_raw.csv
+data/processed/val_raw.csv
+data/processed/test_raw.csv
+
+# Modelos entrenados. modelo2_randomforest.joblib pesa 70 MB: GitHub
+# advierte sobre archivos >50 MB y rechaza los >100 MB.
+modelos/*.joblib
+modelos/*.cbm
+
+# Datos limpios intermedios (los regenera 02_limpieza.py)
+data/processed/A_2014_2025_limpio.csv
+data/processed/B_2026_limpio.csv
+
+# Logs de entrenamiento que CatBoost crea solo en cada corrida
+catboost_info/
+
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# ---------------------------------------------------------------------------
+# Entornos y editores
+# ---------------------------------------------------------------------------
+.ipynb_checkpoints/
+.vscode/
+.idea/
+
+# ---------------------------------------------------------------------------
+# Windows / OneDrive
+# ---------------------------------------------------------------------------
+Thumbs.db
+desktop.ini
+*.tmp
+~$*

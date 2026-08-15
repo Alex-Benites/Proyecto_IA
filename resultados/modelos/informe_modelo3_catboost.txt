@@ -1,0 +1,159 @@
+
+##############################################################################
+MODELO 3: CATBOOST (categoricas nativas)
+##############################################################################
+Python 3.13.3 | catboost 1.2.10 | semilla 42
+
+Fuente: train_raw.csv / val_raw.csv (ANTES del One-Hot)
+Train: (14630, 19)  |  Val: (3135, 19)
+Columnas categoricas declaradas: 17
+Columnas numericas: ['edad', 'es_fin_semana']
+'edad': 410 NaN en train y 108 en val -> imputados con la mediana del train (30.0)
+NO se escala: a un arbol le da igual la escala de una variable.
+
+==============================================================================
+EXPERIMENTO 1: ¿que learning_rate usar? (barrido manual)
+==============================================================================
+  learning_rate (eta) controla cuanto corrige CADA arbol nuevo.
+  Bajo -> aprende despacio, necesita muchos arboles, generaliza mejor.
+  Alto -> aprende rapido, pocos arboles, riesgo de sobreajustar.
+
+      lr |  arboles |  F1 train |    F1 val |  brecha
+  ----------------------------------------------------
+    0.03 |     1490 |    0.6938 |    0.6225 |  0.0713
+    0.06 |     1500 |    0.7810 |    0.6392 |  0.1418
+    0.10 |      903 |    0.7960 |    0.6455 |  0.1505
+    0.20 |      329 |    0.6908 |    0.6168 |  0.0740
+    0.30 |      194 |    0.6782 |    0.6216 |  0.0566
+
+  Mejor F1 absoluto : 0.6455 (lr=0.1)
+  Umbral del 1%     : 0.6390
+  ELEGIDO (lr mas bajo dentro del umbral): lr=0.06 con 1500 arboles -> F1 val 0.6392
+  Mismo criterio de parsimonia que se aplico en Random Forest.
+  Grafico: Graficos/modelo3_catboost_fig0_learningrate.png
+
+==============================================================================
+MODELO FINAL (hiperparametros explicitos)
+==============================================================================
+  iterations = 1500
+  learning_rate = 0.06
+  depth = 6
+  loss_function = MultiClass
+  random_seed = 42
+  verbose = False
+
+  Justificacion:
+    iterations    : cantidad de arboles del boosting. La fijo el early
+                    stopping del experimento 1, no una eleccion a dedo.
+    learning_rate : cuanto corrige cada arbol nuevo. Ver experimento 1.
+    depth=6       : CatBoost usa arboles SIMETRICOS (todas las divisiones
+                    de un nivel usan la misma variable y el mismo corte).
+                    Eso ya actua como regularizacion, por eso 6 alcanza
+                    donde Random Forest necesitaba 25.
+    loss_function : MultiClass = LogLoss multinomial, la MISMA entropia
+                    cruzada de la regresion logistica. La diferencia no
+                    esta en QUE minimiza, sino en COMO: sumando arboles
+                    en vez de ajustando pesos lineales.
+
+==============================================================================
+METRICAS
+==============================================================================
+
+  --- TRAIN ---
+  Accuracy         : 0.7810
+  Precision (macro): 0.7815
+  Recall (macro)   : 0.7808
+  F1 (macro)       : 0.7810
+
+  --- VALIDACION ---
+  Accuracy         : 0.6402
+  Precision (macro): 0.6404
+  Recall (macro)   : 0.6391
+  F1 (macro)       : 0.6392
+
+==============================================================================
+CHEQUEO DE OVERFITTING / UNDERFITTING
+==============================================================================
+  F1 macro train : 0.7810
+  F1 macro val   : 0.6392
+  Diferencia     : 0.1418
+  -> OVERFITTING: el boosting memoriza parte del train.
+
+==============================================================================
+REPORTE POR CLASE (VALIDACION)
+==============================================================================
+                  precision    recall  f1-score   support
+
+      ARMA_FUEGO       0.65      0.60      0.62       769
+     ARMA_BLANCA       0.64      0.69      0.66       828
+ARMA_CONTUNDENTE       0.69      0.68      0.68       777
+           OTRAS       0.58      0.59      0.59       761
+
+        accuracy                           0.64      3135
+       macro avg       0.64      0.64      0.64      3135
+    weighted avg       0.64      0.64      0.64      3135
+
+
+==============================================================================
+MATRIZ DE CONFUSION (VALIDACION)
+==============================================================================
+                       pred_ARMA_FUEGO  pred_ARMA_BLANCA  pred_ARMA_CONTUNDENTE  pred_OTRAS
+real_ARMA_FUEGO                    460                31                    111         167
+real_ARMA_BLANCA                    66               569                     83         110
+real_ARMA_CONTUNDENTE               67               136                    529          45
+real_OTRAS                         114               152                     46         449
+
+==============================================================================
+EXPERIMENTO 2: categoricas NATIVAS vs ONE-HOT
+==============================================================================
+  Mismo CatBoost, mismos hiperparametros, mismo split.
+  Unica diferencia: como recibe las 17 columnas categoricas.
+    NATIVO  -> texto crudo, CatBoost usa ordered target statistics
+    ONE-HOT -> las 475 columnas 0/1 que usan los modelos 1 y 2
+
+  CatBoost + categoricas NATIVAS : F1 macro val = 0.6392
+  CatBoost + ONE-HOT (475 cols)  : F1 macro val = 0.6189
+  Diferencia a favor de nativo   : +0.0203
+
+  -> El manejo nativo SI aporta. Justifica haber usado train_raw.csv
+     en vez del train_X.npy compartido con los modelos 1 y 2.
+  Grafico: Graficos/modelo3_catboost_fig7_nativo_vs_onehot.png
+
+==============================================================================
+IMPORTANCIA DE VARIABLES
+==============================================================================
+  (a diferencia de los modelos 1 y 2, aqui cada variable aparece UNA
+   vez, no dispersa en decenas de columnas one-hot)
+
+mes                        27.6710
+presun_motiva_observada    15.2544
+lugar                       8.1778
+canton                      7.4746
+hora                        5.7770
+presunta_motivacion         5.2941
+provincia                   5.1824
+edad                        3.9777
+zona                        3.4261
+dia_semana                  3.2287
+franja_horaria              2.7819
+sexo                        2.5191
+estado_civil                2.4013
+nacionalidad                2.1839
+etnia                       1.7345
+discapacidad                1.4760
+area_hecho                  1.0944
+tipo_lugar                  0.2838
+es_fin_semana               0.0613
+  Grafico: Graficos/modelo3_catboost_fig6_importancia.png
+
+==============================================================================
+COMPARATIVA DE LOS 3 MODELOS (validacion)
+==============================================================================
+                CatBoost (nativo)  Regresion Logistica  Random Forest
+Accuracy (val)             0.6402               0.5939         0.6300
+F1 macro (val)             0.6392               0.5923         0.6283
+
+##############################################################################
+FIN MODELO 3
+##############################################################################
+Guardado: modelos/modelo3_catboost.joblib (y .cbm nativo)

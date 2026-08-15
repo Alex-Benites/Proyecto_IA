@@ -1,0 +1,209 @@
+
+##############################################################################
+ETAPA 2 - VALIDACION Y LIMPIEZA
+##############################################################################
+Python 3.13.3 | pandas 2.3.1 | numpy 2.3.2 | semilla 42
+
+Solo transformaciones DETERMINISTICAS. Sin imputar, sin escalar,
+sin codificar: eso requiere aprender parametros y va DESPUES del split.
+
+##############################################################################
+LIMPIEZA DE A_2014_2025
+##############################################################################
+  Entrada: 39,821 filas x 33 columnas
+  1. Texto normalizado (mayusculas, sin acentos) en 28 columnas
+  2. Target construido: arma (6 cat.) -> y (4 clases)
+       ARMA_FUEGO     31,234  78.44%
+       ARMA_BLANCA     5,208  13.08%
+       OTRAS           2,248   5.65%
+       ARMA_CONTUNDENTE  1,131   2.84%
+  3. Centinelas (SIN_DATO / NO DETERMINADO / NO APLICA) -> NaN:
+       instruccion                  30,175 valores marcados como faltantes
+       profesion_registro_civil      6,757 valores marcados como faltantes
+       genero                        6,599 valores marcados como faltantes
+       estado_civil                  3,540 valores marcados como faltantes
+       tipo_arma                     1,616 valores marcados como faltantes
+       etnia                         1,575 valores marcados como faltantes
+       nacionalidad                  1,348 valores marcados como faltantes
+       discapacidad                    892 valores marcados como faltantes
+       medida_edad                     881 valores marcados como faltantes
+       sexo                            162 valores marcados como faltantes
+       presunta_motivacion               1 valores marcados como faltantes
+       presun_motiva_observada           1 valores marcados como faltantes
+  4. Numericas validadas:
+       coordenadas (0,0) -> NaN      : 1,567
+       coordenadas fuera Ecuador     : 0
+       edad fuera de [0,110] -> NaN  : 0
+       edad nula (total)             : 881
+       edad == 0 (se CONSERVAN)      : 61
+       Nota: edad 0 puede ser real (infanticidio). No se elimina.
+  5. Variables temporales derivadas: anio, mes, dia_semana,
+     es_fin_semana, hora, franja_horaria
+       fechas no parseables: 0
+       horas no parseables : 5
+
+  --- Duplicados en A_2014_2025 ---
+  Filas identicas en todas las columnas: 196 (0.49%)
+  DECISION: NO se eliminan.
+  Justificacion: una fila = una VICTIMA, no un hecho. Se verifico en
+  los datos que estos duplicados corresponden a hechos con multiples
+  victimas (mismo canton, misma hora, mismo perfil demografico).
+  Ejemplo real: 3 filas identicas en QUEVEDO 2016-11-02 10:20 con
+  sexo NO DETERMINADO = 3 cuerpos sin identificar del mismo evento.
+  Eliminarlos borraria personas reales y subestimaria la violencia
+  de alto impacto (masacres), que es justamente donde el arma de
+  fuego domina. Seria un sesgo contra la clase mayoritaria.
+
+  7. Columnas eliminadas por LEAKAGE:
+       [tipo_arma] Es la subcategoria directa de 'arma' (PISTOLA->ARMA DE FUEGO). Determina el target al 100%.
+       [probable_causa_motivada] Resultado forense posterior. Determina 'arma' al 99.8% (HERIDA POR ARMA DE FUEGO -> ARMA DE FUEGO).
+       [arma] Es el target. Se transforma en 'y' y se elimina el original.
+
+  8. Columnas eliminadas por decision de diseno:
+       [tipo_muerte] Calificacion JURIDICA posterior al hecho, no un dato de la escena. Ademas tiene sesgo administrativo severo: ZONA 9 clasifica 71.6% como HOMICIDIO vs ZONA 8 con 2.5% (29x). El modelo aprenderia la practica de la fiscalia, no el crimen.
+       [medida_edad] Constante util: solo vale 'A' (anios) o SIN_DATO. El SIN_DATO es redundante con edad nula. No aporta informacion.
+       [instruccion] 75.8% SIN_DATO en A y 90.1% en B. Ademas la tasa de vacio CAMBIA entre datasets -> variable inestable en el tiempo.
+       [genero] Redundante con 'sexo': 30.339 HOMBRE->MASCULINO y 2.662 MUJER->FEMENINO (>99% de coincidencia). Ademas 16.6% de faltantes en A contra 0.6% en B: cambio la practica de registro, seria inestable al predecir en 2026.
+       [codigo_subcircuito] 1745 categorias. Redundante con 'subcircuito' y demasiado granular: permite memorizar registros.
+       [subcircuito] 1609 categorias. Mismo problema. La geografia ya esta representada por zona/provincia/canton/area_hecho.
+       [circuito] 933 categorias. Mismo problema de granularidad.
+       [codigo_provincia] Redundante: es el codigo numerico de 'provincia'.
+       [codigo_canton] Redundante: es el codigo numerico de 'canton'.
+       [profesion_registro_civil] 64 categorias muy dispersas, 17-19% SIN_DATO, y listas de categorias distintas entre A y B (24 solo en A, 18 solo en B).
+
+  9. Columnas DUDOSAS conservadas (se medira su impacto con/sin):
+       [presunta_motivacion] Resultado de investigacion posterior al hecho. Podria no estar disponible al momento de predecir.
+       [presun_motiva_observada] Igual, y mas granular (35 categorias).
+
+  SALIDA: 39,821 filas x 27 columnas
+  (se conservo el 100.00% de las filas)
+
+##############################################################################
+LIMPIEZA DE B_2026
+##############################################################################
+  Entrada: 4,154 filas x 33 columnas
+  1. Texto normalizado (mayusculas, sin acentos) en 28 columnas
+  2. Target construido: arma (6 cat.) -> y (4 clases)
+       ARMA_FUEGO      3,671  88.37%
+       ARMA_BLANCA       313   7.53%
+       OTRAS             121   2.91%
+       ARMA_CONTUNDENTE     49   1.18%
+  3. Centinelas (SIN_DATO / NO DETERMINADO / NO APLICA) -> NaN:
+       instruccion                   3,742 valores marcados como faltantes
+       profesion_registro_civil        775 valores marcados como faltantes
+       estado_civil                    453 valores marcados como faltantes
+       etnia                           221 valores marcados como faltantes
+       nacionalidad                    212 valores marcados como faltantes
+       medida_edad                     109 valores marcados como faltantes
+       genero                           24 valores marcados como faltantes
+       discapacidad                     19 valores marcados como faltantes
+       sexo                             13 valores marcados como faltantes
+       area_hecho                        1 valores marcados como faltantes
+  4. Numericas validadas:
+       coordenadas (0,0) -> NaN      : 0
+       coordenadas fuera Ecuador     : 0
+       edad fuera de [0,110] -> NaN  : 0
+       edad nula (total)             : 109
+       edad == 0 (se CONSERVAN)      : 1
+       Nota: edad 0 puede ser real (infanticidio). No se elimina.
+  5. Variables temporales derivadas: anio, mes, dia_semana,
+     es_fin_semana, hora, franja_horaria
+       fechas no parseables: 0
+       horas no parseables : 0
+
+  --- Duplicados en B_2026 ---
+  Filas identicas en todas las columnas: 32 (0.77%)
+  DECISION: NO se eliminan.
+  Justificacion: una fila = una VICTIMA, no un hecho. Se verifico en
+  los datos que estos duplicados corresponden a hechos con multiples
+  victimas (mismo canton, misma hora, mismo perfil demografico).
+  Ejemplo real: 3 filas identicas en QUEVEDO 2016-11-02 10:20 con
+  sexo NO DETERMINADO = 3 cuerpos sin identificar del mismo evento.
+  Eliminarlos borraria personas reales y subestimaria la violencia
+  de alto impacto (masacres), que es justamente donde el arma de
+  fuego domina. Seria un sesgo contra la clase mayoritaria.
+
+  7. Columnas eliminadas por LEAKAGE:
+       [tipo_arma] Es la subcategoria directa de 'arma' (PISTOLA->ARMA DE FUEGO). Determina el target al 100%.
+       [probable_causa_motivada] Resultado forense posterior. Determina 'arma' al 99.8% (HERIDA POR ARMA DE FUEGO -> ARMA DE FUEGO).
+       [arma] Es el target. Se transforma en 'y' y se elimina el original.
+
+  8. Columnas eliminadas por decision de diseno:
+       [tipo_muerte] Calificacion JURIDICA posterior al hecho, no un dato de la escena. Ademas tiene sesgo administrativo severo: ZONA 9 clasifica 71.6% como HOMICIDIO vs ZONA 8 con 2.5% (29x). El modelo aprenderia la practica de la fiscalia, no el crimen.
+       [medida_edad] Constante util: solo vale 'A' (anios) o SIN_DATO. El SIN_DATO es redundante con edad nula. No aporta informacion.
+       [instruccion] 75.8% SIN_DATO en A y 90.1% en B. Ademas la tasa de vacio CAMBIA entre datasets -> variable inestable en el tiempo.
+       [genero] Redundante con 'sexo': 30.339 HOMBRE->MASCULINO y 2.662 MUJER->FEMENINO (>99% de coincidencia). Ademas 16.6% de faltantes en A contra 0.6% en B: cambio la practica de registro, seria inestable al predecir en 2026.
+       [codigo_subcircuito] 1745 categorias. Redundante con 'subcircuito' y demasiado granular: permite memorizar registros.
+       [subcircuito] 1609 categorias. Mismo problema. La geografia ya esta representada por zona/provincia/canton/area_hecho.
+       [circuito] 933 categorias. Mismo problema de granularidad.
+       [codigo_provincia] Redundante: es el codigo numerico de 'provincia'.
+       [codigo_canton] Redundante: es el codigo numerico de 'canton'.
+       [profesion_registro_civil] 64 categorias muy dispersas, 17-19% SIN_DATO, y listas de categorias distintas entre A y B (24 solo en A, 18 solo en B).
+
+  9. Columnas DUDOSAS conservadas (se medira su impacto con/sin):
+       [presunta_motivacion] Resultado de investigacion posterior al hecho. Podria no estar disponible al momento de predecir.
+       [presun_motiva_observada] Igual, y mas granular (35 categorias).
+
+  SALIDA: 4,154 filas x 27 columnas
+  (se conservo el 100.00% de las filas)
+
+##############################################################################
+VERIFICACION: ¿son compatibles A y B DESPUES de limpiar?
+##############################################################################
+Columnas identicas: True
+
+Categorias de B que NO existen en A (serian 'desconocidas' para el modelo):
+  [distrito] 1 categorias nuevas, afectan 80 filas: ['PUEBLOVIEJO']
+  [lugar] 1 categorias nuevas, afectan 1 filas: ['FERIA DE VEHICULOS']
+  [presun_motiva_observada] 1 categorias nuevas, afectan 759 filas: ['TRAFICO INTERNOS DE DROGAS (MICROTRAFICO)']
+  -> Se trataran en la Etapa 5 (categoria 'DESCONOCIDA').
+
+Distribucion del target en cada dataset:
+                  %A_2014_2025  %B_2026  diff
+y                                            
+ARMA_FUEGO               78.44    88.37  9.93
+ARMA_BLANCA              13.08     7.53 -5.55
+OTRAS                     5.65     2.91 -2.74
+ARMA_CONTUNDENTE          2.84     1.18 -1.66
+
+Faltantes (%) por columna en cada dataset:
+                         %NaN_A  %NaN_B  diff
+coordenada_x               3.94    0.00 -3.94
+coordenada_y               3.94    0.00 -3.94
+estado_civil               8.89   10.91  2.02
+discapacidad               2.24    0.46 -1.78
+nacionalidad               3.39    5.10  1.71
+etnia                      3.96    5.32  1.36
+edad                       2.21    2.62  0.41
+sexo                       0.41    0.31 -0.10
+area_hecho                 0.00    0.02  0.02
+hora                       0.01    0.00 -0.01
+franja_horaria             0.01    0.00 -0.01
+presunta_motivacion        0.00    0.00  0.00
+tipo_lugar                 0.00    0.00  0.00
+lugar                      0.00    0.00  0.00
+provincia                  0.00    0.00  0.00
+canton                     0.00    0.00  0.00
+zona                       0.00    0.00  0.00
+subzona                    0.00    0.00  0.00
+distrito                   0.00    0.00  0.00
+arma_categoria             0.00    0.00  0.00
+presun_motiva_observada    0.00    0.00  0.00
+y                          0.00    0.00  0.00
+anio                       0.00    0.00  0.00
+dia_semana                 0.00    0.00  0.00
+mes                        0.00    0.00  0.00
+fecha                      0.00    0.00  0.00
+es_fin_semana              0.00    0.00  0.00
+
+ALERTA si |diff| es grande: la practica de registro cambio entre
+periodos y esa variable sera inestable al predecir en 2026.
+
+##############################################################################
+FIN DE LA ETAPA 2
+##############################################################################
+Guardado: data\processed\A_2014_2025_limpio.csv  (39,821 x 27)
+Guardado: data\processed\B_2026_limpio.csv  (4,154 x 27)
+
+Los datasets siguen SEPARADOS. B_2026 es el test final sellado.
+Columnas finales: zona, subzona, distrito, provincia, canton, coordenada_y, coordenada_x, area_hecho, lugar, tipo_lugar, presunta_motivacion, presun_motiva_observada, edad, sexo, etnia, estado_civil, nacionalidad, discapacidad, arma_categoria, y, anio, mes, dia_semana, es_fin_semana, fecha, hora, franja_horaria

@@ -1,0 +1,46 @@
+# requirements.txt
+# Instalar con: pip install -r requirements.txt
+#
+# VERSIONES FIJADAS CON == A PROPOSITO
+# ------------------------------------
+# El pipeline es determinista: mismo dataset.xlsx + SEMILLA=42 producen
+# exactamente los mismos splits (verificado por hash MD5 de train_X.npy).
+# Pero esa garantia SOLO se sostiene si todo el equipo usa las mismas
+# versiones de libreria: un cambio de version en scikit-learn puede alterar
+# el orden de categorias del OneHotEncoder o el generador aleatorio, y ahi
+# los .npy dejarian de coincidir y los modelos ya no serian comparables.
+#
+# Estas son las versiones con las que se entrenaron los modelos 1, 2 y 3.
+# Python 3.13.3
+
+# --- Nucleo: usado por TODOS los scripts ---
+pandas==2.3.1
+numpy==2.3.2
+scikit-learn==1.8.0
+joblib==1.5.2
+openpyxl==3.1.5          # lectura de los .xlsx
+matplotlib==3.10.7       # graficos de diagnostico
+
+# --- Modelo 3: CatBoost ---
+catboost==1.2.10
+
+# --- Modelos pendientes (descomentar cuando se entrenen) ---
+# Modelo 4: XGBoost
+# xgboost==2.1.3
+#
+# Modelo 5: MLP / red neuronal.
+# Nota: el MLP puede hacerse con sklearn.neural_network.MLPClassifier, que ya
+# viene en scikit-learn y no requiere instalar nada extra. Solo hace falta
+# TensorFlow si se opta por construir la red con Keras.
+# tensorflow==2.18.0
+
+# --- Aplicacion final (Etapa 9, aun no empezada) ---
+# streamlit==1.41.1
+
+# --- ELIMINADAS del proyecto original y por que ---
+# imbalanced-learn : traia SMOTE, que fabrica victimas sinteticas interpolando
+#                    registros reales. Se descarto por el criterio de datos
+#                    reales del proyecto.
+# seaborn          : matplotlib cubre todos los graficos que necesitamos.
+# shap             : los modelos ya exponen coef_ / feature_importances_,
+#                    que son interpretables sin libreria extra.
