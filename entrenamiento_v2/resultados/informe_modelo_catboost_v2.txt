@@ -1,0 +1,286 @@
+
+##############################################################################
+ENTRENAMIENTO V2 - CATBOOST (categoricas nativas)
+##############################################################################
+Python 3.13.3 | catboost 1.2.10 | semilla 42
+
+==============================================================================
+VARIANTE A (auto_class_weights=Balanced)
+==============================================================================
+  Fuente: variante_a_train_raw.csv / _val_raw.csv (ANTES del one-hot)
+  Train: (30782, 18)  |  Val: (6596, 18)
+  Categoricas declaradas: 16  |  Numericas: ['edad', 'es_fin_semana']
+  'edad': 702 NaN en train y 136 en val -> mediana del train (30.0)
+
+  Distribucion real en train:
+    ARMA_FUEGO         24,433  (79.37%)
+    ARMA_BLANCA         3,865  (12.56%)
+    ARMA_CONTUNDENTE      826  ( 2.68%)
+    OTRAS               1,658  ( 5.39%)
+
+  Pesos que aplica auto_class_weights='Balanced':
+    ARMA_FUEGO         peso =  0.315
+    ARMA_BLANCA        peso =  1.991
+    ARMA_CONTUNDENTE   peso =  9.317
+    OTRAS              peso =  4.641
+
+  EXPERIMENTO 1: learning_rate (VARIANTE A)
+  eta controla cuanto corrige CADA arbol nuevo.
+  Bajo -> aprende despacio, necesita muchos arboles, generaliza mejor.
+  Alto -> aprende rapido, pocos arboles, riesgo de sobreajustar.
+
+      lr |  arboles |  F1 train |    F1 val |  brecha
+  ----------------------------------------------------
+    0.03 |      873 |    0.5411 |    0.4838 |  0.0573
+    0.06 |      283 |    0.5194 |    0.4720 |  0.0474
+    0.10 |      323 |    0.5396 |    0.4799 |  0.0597
+    0.20 |      101 |    0.5095 |    0.4701 |  0.0394
+    0.30 |       68 |    0.5090 |    0.4740 |  0.0350
+
+  Mejor F1 val absoluto : 0.4838 (lr=0.03)
+  Umbral de parsimonia  : 0.4790 (99% del mejor)
+  ELEGIDO               : lr=0.03 con 873 arboles -> F1 val 0.4838
+
+  HIPERPARAMETROS FINALES (VARIANTE A):
+    iterations = 873
+    learning_rate = 0.03
+    depth = 6
+    loss_function = MultiClass
+    auto_class_weights = Balanced
+    random_seed = 42
+    verbose = False
+    l2_leaf_reg = 3.0     (DEFAULT de CatBoost)
+    border_count = 254    (DEFAULT)
+    grow_policy = SymmetricTree (DEFAULT: arboles simetricos)
+
+    iterations    : lo fijo el early stopping del experimento 1.
+    learning_rate : elegido en el experimento 1 (regla de parsimonia).
+    depth=6       : arboles SIMETRICOS (todas las divisiones de un nivel
+                    usan la misma variable y el mismo corte). Eso ya es
+                    regularizacion: por eso 6 alcanza donde Random Forest
+                    necesitaba 25.
+
+    --- TRAIN ---
+    Accuracy         : 0.7781
+    Precision (macro): 0.5004
+    Recall (macro)   : 0.6325
+    F1 (macro)       : 0.5411
+
+    --- VALIDACION ---
+    Accuracy         : 0.7624
+    Precision (macro): 0.4561
+    Recall (macro)   : 0.5495
+    F1 (macro)       : 0.4838
+
+  OVERFITTING / UNDERFITTING: brecha F1 train-val = 0.0573
+    -> Sin senales fuertes de over/underfitting.
+
+  Reporte por clase (validacion):
+                  precision    recall  f1-score   support
+
+      ARMA_FUEGO       0.95      0.83      0.89      5236
+     ARMA_BLANCA       0.43      0.52      0.47       828
+ARMA_CONTUNDENTE       0.14      0.34      0.20       177
+           OTRAS       0.30      0.50      0.38       355
+
+        accuracy                           0.76      6596
+       macro avg       0.46      0.55      0.48      6596
+    weighted avg       0.83      0.76      0.79      6596
+
+                       pred_ARMA_FUEGO  pred_ARMA_BLANCA  pred_ARMA_CONTUNDENTE  pred_OTRAS
+real_ARMA_FUEGO                   4360               467                    184         225
+real_ARMA_BLANCA                   126               430                    124         148
+real_ARMA_CONTUNDENTE               26                52                     61          38
+real_OTRAS                          54                62                     61         178
+
+  IMPORTANCIA DE VARIABLES (cada variable aparece UNA vez, no
+  dispersa en decenas de columnas one-hot):
+presun_motiva_observada    18.4634
+lugar                      16.3352
+hora                        7.2164
+edad                        7.1044
+provincia                   6.6344
+canton                      5.8180
+zona                        5.4553
+presunta_motivacion         5.0794
+area_hecho                  4.5768
+estado_civil                3.9491
+sexo                        3.9286
+franja_horaria              3.8655
+dia_semana                  3.8471
+nacionalidad                3.1419
+etnia                       1.8940
+discapacidad                1.6845
+tipo_lugar                  0.8293
+es_fin_semana               0.1768
+
+==============================================================================
+VARIANTE B (auto_class_weights=None)
+==============================================================================
+  Fuente: variante_b_train_raw.csv / _val_raw.csv (ANTES del one-hot)
+  Train: (10409, 18)  |  Val: (2230, 18)
+  Categoricas declaradas: 16  |  Numericas: ['edad', 'es_fin_semana']
+  'edad': 307 NaN en train y 61 en val -> mediana del train (31.0)
+
+  Distribucion real en train:
+    ARMA_FUEGO          4,060  (39.00%)
+    ARMA_BLANCA         3,865  (37.13%)
+    ARMA_CONTUNDENTE      826  ( 7.94%)
+    OTRAS               1,658  (15.93%)
+
+  EXPERIMENTO 1: learning_rate (VARIANTE B)
+  eta controla cuanto corrige CADA arbol nuevo.
+  Bajo -> aprende despacio, necesita muchos arboles, generaliza mejor.
+  Alto -> aprende rapido, pocos arboles, riesgo de sobreajustar.
+
+      lr |  arboles |  F1 train |    F1 val |  brecha
+  ----------------------------------------------------
+    0.03 |     1215 |    0.5443 |    0.5047 |  0.0396
+    0.06 |      749 |    0.5457 |    0.5136 |  0.0321
+    0.10 |      542 |    0.5625 |    0.5101 |  0.0523
+    0.20 |      158 |    0.5379 |    0.5076 |  0.0303
+    0.30 |      142 |    0.5361 |    0.5229 |  0.0133
+
+  Mejor F1 val absoluto : 0.5229 (lr=0.3)
+  Umbral de parsimonia  : 0.5177 (99% del mejor)
+  ELEGIDO               : lr=0.3 con 142 arboles -> F1 val 0.5229
+
+  HIPERPARAMETROS FINALES (VARIANTE B):
+    iterations = 142
+    learning_rate = 0.3
+    depth = 6
+    loss_function = MultiClass
+    auto_class_weights = None
+    random_seed = 42
+    verbose = False
+    l2_leaf_reg = 3.0     (DEFAULT de CatBoost)
+    border_count = 254    (DEFAULT)
+    grow_policy = SymmetricTree (DEFAULT: arboles simetricos)
+
+    iterations    : lo fijo el early stopping del experimento 1.
+    learning_rate : elegido en el experimento 1 (regla de parsimonia).
+    depth=6       : arboles SIMETRICOS (todas las divisiones de un nivel
+                    usan la misma variable y el mismo corte). Eso ya es
+                    regularizacion: por eso 6 alcanza donde Random Forest
+                    necesitaba 25.
+
+    --- TRAIN ---
+    Accuracy         : 0.6946
+    Precision (macro): 0.6929
+    Recall (macro)   : 0.5407
+    F1 (macro)       : 0.5470
+
+    --- VALIDACION ---
+    Accuracy         : 0.6758
+    Precision (macro): 0.5741
+    Recall (macro)   : 0.5092
+    F1 (macro)       : 0.5057
+
+  OVERFITTING / UNDERFITTING: brecha F1 train-val = 0.0413
+    -> Sin senales fuertes de over/underfitting.
+
+  Reporte por clase (validacion):
+                  precision    recall  f1-score   support
+
+      ARMA_FUEGO       0.77      0.84      0.81       870
+     ARMA_BLANCA       0.62      0.75      0.68       828
+ARMA_CONTUNDENTE       0.35      0.04      0.07       177
+           OTRAS       0.55      0.40      0.46       355
+
+        accuracy                           0.68      2230
+       macro avg       0.57      0.51      0.51      2230
+    weighted avg       0.65      0.68      0.65      2230
+
+                       pred_ARMA_FUEGO  pred_ARMA_BLANCA  pred_ARMA_CONTUNDENTE  pred_OTRAS
+real_ARMA_FUEGO                    735               120                      1          14
+real_ARMA_BLANCA                   131               623                      5          69
+real_ARMA_CONTUNDENTE               31               107                      7          32
+real_OTRAS                          59               147                      7         142
+
+  IMPORTANCIA DE VARIABLES (cada variable aparece UNA vez, no
+  dispersa en decenas de columnas one-hot):
+lugar                      20.0786
+presun_motiva_observada    19.5576
+provincia                   8.3223
+zona                        8.2823
+presunta_motivacion         7.8481
+edad                        7.4597
+hora                        6.0028
+sexo                        3.3927
+area_hecho                  3.2678
+franja_horaria              2.8814
+estado_civil                2.8671
+tipo_lugar                  2.8389
+dia_semana                  2.7033
+etnia                       1.8784
+nacionalidad                1.8181
+discapacidad                0.4864
+es_fin_semana               0.3144
+canton                      0.0000
+
+==============================================================================
+EXPERIMENTO 2: categoricas NATIVAS vs ONE-HOT
+==============================================================================
+  NATIVO  -> texto crudo, CatBoost usa ordered target statistics
+  ONE-HOT -> las mismas columnas 0/1 que usan logistica y Random Forest
+
+  VARIANTE A  (495 columnas tras one-hot)
+    NATIVAS (ordered target statistics): F1 macro val = 0.4838
+    ONE-HOT                            : F1 macro val = 0.4754
+    Diferencia a favor de nativo       : +0.0084
+
+  VARIANTE B  (457 columnas tras one-hot)
+    NATIVAS (ordered target statistics): F1 macro val = 0.5057
+    ONE-HOT                            : F1 macro val = 0.5142
+    Diferencia a favor de nativo       : -0.0085
+
+  -> El manejo nativo aporta solo en una variante. Hallazgo valido:
+     el beneficio depende de cuantos datos hay por categoria.
+  (En V1, con dataset.xlsx, la diferencia fue +0.0203 a favor de nativo.)
+
+==============================================================================
+COMPARACION DIRECTA A vs B
+==============================================================================
+                  Variante A (auto_class_weights)  Variante B (recorte)
+learning_rate                              0.0300                0.3000
+arboles                                  873.0000              142.0000
+Accuracy (val)                             0.7624                0.6758
+F1 macro (val)                             0.4838                0.5057
+Brecha train-val                           0.0573                0.0413
+
+==============================================================================
+COMPARACION CONTRA EL CATBOOST DE V1 (dataset.xlsx)
+==============================================================================
+  V1 (con filas fabricadas, lr=0.06, 1500 arboles, sin pesos de clase):
+      Accuracy val 0.6402 | F1 macro val 0.6392 | brecha 0.142
+  V2 Variante A: Accuracy val 0.7624 | F1 macro val 0.4838 | brecha 0.0573
+  V2 Variante B: Accuracy val 0.6758 | F1 macro val 0.5057 | brecha 0.0413
+
+  Igual que con la logistica: NO son comparables como 'quien es mejor'.
+  El val de V1 tambien contiene filas fabricadas y clases artificialmente
+  equilibradas (25% c/u), asi que su F1 macro esta inflado.
+
+==============================================================================
+COMPARATIVA DE MODELOS V2 (validacion)
+==============================================================================
+                Accuracy (val)  F1 macro (val)  Brecha train-val
+CatBoost A              0.7624          0.4838            0.0573
+CatBoost B              0.6758          0.5057            0.0413
+RandomForest A          0.8170          0.5108            0.2717
+RandomForest B          0.6843          0.4927            0.1139
+Logistica A             0.7315          0.4468            0.0175
+Logistica B             0.6686          0.5037            0.0156
+
+==============================================================================
+GRAFICOS
+==============================================================================
+  Graficos/catboost_v2_experimento_learning_rate.png
+  Graficos/catboost_v2_matrices_confusion.png
+  Graficos/catboost_v2_comparacion.png
+  Graficos/catboost_v2_experimento_nativo_vs_onehot.png
+  Graficos/catboost_v2_importancia.png
+
+##############################################################################
+FIN
+##############################################################################
+Guardado: modelos/catboost_variante_{a,b}.joblib (y .cbm nativo)

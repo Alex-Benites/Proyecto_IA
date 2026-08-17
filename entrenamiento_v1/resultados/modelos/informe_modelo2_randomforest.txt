@@ -1,0 +1,117 @@
+
+##############################################################################
+MODELO 2: RANDOM FOREST
+##############################################################################
+Python 3.13.3 | scikit-learn 1.8.0 | semilla 42
+
+Train: (14630, 463)  |  Val: (3135, 463)
+
+==============================================================================
+EXPERIMENTO 1: ¿que profundidad usar? (barrido manual)
+==============================================================================
+  Se prueba cada profundidad y se mide F1 en train y en validacion.
+  Objetivo: encontrar donde el modelo deja de generalizar y empieza
+  a memorizar. NO se usa GridSearchCV: el barrido es explicito.
+
+   max_depth |  F1 train |    F1 val |  brecha
+  ---------------------------------------------
+           4 |    0.3857 |    0.3846 |  0.0010
+           6 |    0.4266 |    0.4023 |  0.0243
+           8 |    0.4738 |    0.4298 |  0.0440
+          10 |    0.5280 |    0.4462 |  0.0818
+          12 |    0.5878 |    0.4552 |  0.1326
+          15 |    0.6906 |    0.4830 |  0.2075
+          20 |    0.8325 |    0.5161 |  0.3164
+          25 |    0.9145 |    0.5154 |  0.3991
+          30 |    0.9654 |    0.5112 |  0.4542
+  sin limite |    0.9952 |    0.5122 |  0.4830
+
+  Mejor F1 absoluto      : 0.5161 (max_depth=20, brecha 0.4830)
+  Umbral del 1%          : 0.5109
+  ELEGIDA (mas simple dentro del umbral): max_depth=20 -> F1 val 0.5161, brecha 0.3164
+  Regla: entre modelos de rendimiento equivalente se prefiere el mas
+  simple (navaja de Occam). Gana poco F1 y ahorra mucho overfitting.
+  Grafico: Graficos/modelo2_randomforest_fig0_profundidad.png
+
+==============================================================================
+MODELO FINAL (hiperparametros explicitos)
+==============================================================================
+  n_estimators = 300
+  max_depth = 20
+  min_samples_leaf = 2
+  max_features = sqrt
+  random_state = 42
+  n_jobs = -1
+
+  Justificacion de cada uno:
+    n_estimators=300  : con la curva de arboles se vera que a partir
+                        de ~100 la mejora es marginal; 300 da margen.
+    max_depth         : lo fijo el experimento 1 (ver tabla).
+    min_samples_leaf=2: impide hojas de 1 sola fila (memorizacion pura).
+    max_features=sqrt : el estandar para clasificacion. Es la fuente de
+                        decorrelacion entre arboles; sin esto todos los
+                        arboles se pareceran y el ensemble no sirve.
+    class_weight      : None. El dataset ya viene balanceado.
+
+==============================================================================
+METRICAS
+==============================================================================
+
+  --- TRAIN ---
+  Accuracy         : 0.6710
+  Precision (macro): 0.7016
+  Recall (macro)   : 0.6683
+  F1 (macro)       : 0.6607
+
+  --- VALIDACION ---
+  Accuracy         : 0.5113
+  Precision (macro): 0.5034
+  Recall (macro)   : 0.5074
+  F1 (macro)       : 0.4825
+
+==============================================================================
+CHEQUEO DE OVERFITTING / UNDERFITTING
+==============================================================================
+  F1 macro train : 0.6607
+  F1 macro val   : 0.4825
+  Diferencia     : 0.1783
+  -> OVERFITTING: el bosque memoriza el train. Es el comportamiento
+     esperado de un Random Forest profundo; lo relevante es si aun
+     asi generaliza MEJOR que la logistica en validacion.
+
+==============================================================================
+REPORTE POR CLASE (VALIDACION)
+==============================================================================
+                  precision    recall  f1-score   support
+
+      ARMA_FUEGO       0.46      0.74      0.57       769
+     ARMA_BLANCA       0.61      0.73      0.67       828
+ARMA_CONTUNDENTE       0.42      0.22      0.29       777
+           OTRAS       0.52      0.33      0.40       761
+
+        accuracy                           0.51      3135
+       macro avg       0.50      0.51      0.48      3135
+    weighted avg       0.51      0.51      0.49      3135
+
+
+==============================================================================
+MATRIZ DE CONFUSION (VALIDACION)
+==============================================================================
+                       pred_ARMA_FUEGO  pred_ARMA_BLANCA  pred_ARMA_CONTUNDENTE  pred_OTRAS
+real_ARMA_FUEGO                    572                39                    104          54
+real_ARMA_BLANCA                    89               606                     51          82
+real_ARMA_CONTUNDENTE              350               159                    174          94
+real_OTRAS                         244               182                     84         251
+
+==============================================================================
+COMPARATIVA CONTRA EL MODELO 1
+==============================================================================
+                Regresion Logistica  Random Forest  Diferencia
+Accuracy (val)               0.4746         0.5113      0.0367
+F1 macro (val)               0.4570         0.4825      0.0255
+
+##############################################################################
+FIN MODELO 2
+##############################################################################
+Guardado: modelos/modelo2_randomforest.joblib
+Siguiente: python 05_graficos.py randomforest

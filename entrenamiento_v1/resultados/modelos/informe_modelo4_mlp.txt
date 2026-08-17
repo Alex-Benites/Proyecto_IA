@@ -1,0 +1,235 @@
+
+##############################################################################
+MODELO 4: RED NEURONAL (MLP)
+##############################################################################
+Python 3.13.3 | scikit-learn 1.8.0 | semilla 42
+Libreria principal: sklearn.neural_network.MLPClassifier
+(misma API que los modelos 1-3, asi que 05_graficos.py y la futura app
+ funcionan sin adaptaciones. El experimento 3 entrena ademas la MISMA
+ red en Keras para medir si el resultado depende de la libreria.)
+
+Train: (14630, 463)  |  Val: (3135, 463)
+Los datos YA vienen escalados de 03_preparacion.py. Esto es
+obligatorio para una red neuronal: sin escalar, las variables de
+rango grande dominarian el gradiente y la red no convergeria bien.
+
+Las etiquetas se codifican a enteros internamente (ModeloEtiquetado
+en utilidades.py): rodeo a un bug de sklearn 1.8.0 con early_stopping
+y etiquetas de texto. El modelo resultante es identico.
+
+==============================================================================
+EXPERIMENTO 1: ¿que arquitectura usar? (barrido manual)
+==============================================================================
+  hidden_layer_sizes define la RED ENTERA: cuantas capas ocultas y
+  cuantas neuronas en cada una. Es el hiperparametro mas importante,
+  y el default de sklearn -(100,)- se prueba como una opcion mas,
+  no se acepta a ciegas.
+
+  alpha se deja fijo en su default (0.0001) para aislar el efecto de
+  la arquitectura. Se ajustara en el experimento 2.
+
+      arquitectura |    params |  epocas |  F1 train |    F1 val |  brecha
+  ----------------------------------------------------------------------------
+             (50,) |    23,404 |      74 |    0.6659 |    0.4848 |  0.1811
+            (100,) |    46,804 |      25 |    0.5317 |    0.4619 |  0.0698
+            (200,) |    93,604 |      43 |    0.7144 |    0.4891 |  0.2252
+         (100, 50) |    51,654 |      22 |    0.5332 |    0.4585 |  0.0747
+        (200, 100) |   113,304 |      18 |    0.4715 |    0.4448 |  0.0266
+     (100, 50, 25) |    52,829 |      24 |    0.5692 |    0.4678 |  0.1014
+
+  Mejor F1 absoluto : 0.4891 (arquitectura (200,))
+  Umbral del 1%     : 0.4842
+  ELEGIDA (menos parametros dentro del umbral): (50,) -> 23,404 pesos, F1 val 0.4848
+  Misma regla de parsimonia aplicada en Random Forest y CatBoost.
+  Grafico: Graficos/modelo4_mlp_fig0_arquitectura.png
+
+==============================================================================
+EXPERIMENTO 2: ¿cuanta regularizacion (alpha)?
+==============================================================================
+  alpha es el peso del termino L2 en la perdida: penaliza que los
+  pesos crezcan mucho. Es el freno principal contra el overfitting.
+  Bajo  -> la red memoriza el train.
+  Alto  -> la red queda demasiado simple (underfitting).
+
+  Arquitectura fija: (50,) (elegida en el experimento 1)
+
+     alpha |  epocas |  F1 train |    F1 val |  brecha
+  ----------------------------------------------------
+    0.0001 |      74 |    0.6659 |    0.4848 |  0.1811
+     0.001 |      47 |    0.6096 |    0.4880 |  0.1216
+      0.01 |      65 |    0.6494 |    0.4969 |  0.1525
+       0.1 |      47 |    0.5864 |    0.4894 |  0.0970
+       1.0 |      35 |    0.4805 |    0.4649 |  0.0156
+
+  Mejor F1 absoluto : 0.4969 (alpha=0.01)
+  ELEGIDO (alpha mas alto dentro del 1%): alpha=0.01 -> F1 val 0.4969, brecha 0.1525
+  Criterio: a igual rendimiento, mas regularizacion = menos overfitting.
+  Grafico: Graficos/modelo4_mlp_fig0b_alpha.png
+
+==============================================================================
+MODELO FINAL (los 23 hiperparametros, explicitos)
+==============================================================================
+  hidden_layer_sizes = (50,)
+  alpha = 0.01
+  activation = relu
+  solver = adam
+  learning_rate_init = 0.001
+  max_iter = 300
+  early_stopping = True
+  validation_fraction = 0.1
+  n_iter_no_change = 15
+  random_state = 42
+
+  Justificacion de los que NO salieron de un experimento:
+    activation='relu'     : ReLU(v)=max(0,v). Su derivada es 0 o 1, asi
+                            que no se desvanece el gradiente al propagarlo
+                            hacia atras (problema que si tiene sigmoide).
+    solver='adam'         : optimizador adaptativo, apropiado para
+                            datasets de este tamanio (miles de filas).
+                            'lbfgs' conviene en datasets chicos; 'sgd'
+                            exigiria ajustar el learning rate a mano.
+    learning_rate_init    : 0.001 es el valor estandar de Adam. Se probo
+                            implicitamente: si fuera malo, las curvas de
+                            perdida no bajarian de forma suave.
+    max_iter=300          : tope de epocas. En la practica corta antes
+                            por early stopping.
+    early_stopping=True   : separa un 10% del TRAIN (no toca nuestro set
+                            de validacion) y corta cuando deja de mejorar
+                            por 15 epocas seguidas. Evita sobreentrenar.
+    random_state=42       : sin esto la inicializacion de pesos seria
+                            aleatoria y el resultado NO reproducible.
+
+  Epocas efectivas: 65 (de un maximo de 300)
+  Perdida final   : 0.8119
+  Estructura      : 463 -> 50 -> 4
+  Pesos entrenables: 23,404
+
+==============================================================================
+METRICAS
+==============================================================================
+
+  --- TRAIN ---
+  Accuracy         : 0.6528
+  Precision (macro): 0.6523
+  Recall (macro)   : 0.6505
+  F1 (macro)       : 0.6494
+
+  --- VALIDACION ---
+  Accuracy         : 0.5024
+  Precision (macro): 0.4968
+  Recall (macro)   : 0.4996
+  F1 (macro)       : 0.4969
+
+==============================================================================
+CHEQUEO DE OVERFITTING / UNDERFITTING
+==============================================================================
+  F1 macro train : 0.6494
+  F1 macro val   : 0.4969
+  Diferencia     : 0.1525
+  -> OVERFITTING: la red memoriza parte del train.
+
+==============================================================================
+REPORTE POR CLASE (VALIDACION)
+==============================================================================
+                  precision    recall  f1-score   support
+
+      ARMA_FUEGO       0.48      0.55      0.52       769
+     ARMA_BLANCA       0.62      0.65      0.64       828
+ARMA_CONTUNDENTE       0.40      0.38      0.39       777
+           OTRAS       0.47      0.41      0.44       761
+
+        accuracy                           0.50      3135
+       macro avg       0.50      0.50      0.50      3135
+    weighted avg       0.50      0.50      0.50      3135
+
+
+==============================================================================
+MATRIZ DE CONFUSION (VALIDACION)
+==============================================================================
+                       pred_ARMA_FUEGO  pred_ARMA_BLANCA  pred_ARMA_CONTUNDENTE  pred_OTRAS
+real_ARMA_FUEGO                    425                43                    213          88
+real_ARMA_BLANCA                    68               542                     84         134
+real_ARMA_CONTUNDENTE              228               129                    295         125
+real_OTRAS                         156               155                    137         313
+
+==============================================================================
+CURVA DE PERDIDA POR EPOCA
+==============================================================================
+  Grafico: Graficos/modelo4_mlp_fig4_dinamica.png
+
+==============================================================================
+EXPERIMENTO 3: sklearn vs KERAS (misma configuracion)
+==============================================================================
+  Pregunta: ¿el resultado depende de la LIBRERIA o de los
+  HIPERPARAMETROS? Se entrena la misma red en Keras, dos veces.
+
+  Diferencias que NO se igualan pasando el mismo numero:
+    - LA PENALIZACION L2 NO SIGNIFICA LO MISMO:
+        sklearn: loss += 0.5*alpha*SUM(W^2)/sw_sum, y sw_sum ~ batch
+                 porque _backprop recibe el BATCH, no el dataset.
+        Keras  : loss += alpha*SUM(W^2)   (no divide por nada)
+      Pasar el mismo numero regulariza 2*batch = 400x mas fuerte.
+    - El criterio de parada: sklearn corta por ACCURACY (_score); el
+      default que uno pone en Keras es val_loss.
+    - El split interno: sklearn separa su 10% ESTRATIFICADO; el
+      validation_split de Keras agarra el ultimo 10% sin mirar clase.
+
+  Y las que NO son configurables desde la API:
+    - epsilon de Adam: 1e-8 en sklearn vs 1e-7 en Keras.
+    - inicializacion de pesos y orden de batches: generadores
+      distintos, aunque ambos parten de Glorot uniform.
+
+  keras 3.15.1
+
+  --- 3a. Keras INGENUO: mismo numero de alpha, defaults de Keras ---
+
+  Keras ingenuo
+    Arquitectura: (50,) | batch=200 | Adam lr=0.001
+    l2 aplicado: 1.000e-02   (alpha de sklearn: 0.01)
+    Criterio de parada: val_loss + ultimo 10% (default Keras)
+    Parametros entrenables: 23,404
+    Epocas corridas: 47 (tope 300, paciencia 15)
+    F1 macro train: 0.4916
+    F1 macro val  : 0.4731
+    Brecha        : 0.0185
+
+  --- 3b. Keras ALINEADO: las 3 diferencias controlables igualadas ---
+    alpha=0.01, batch=200 -> l2=2.500e-05 (400x mas suave)
+
+  Keras alineado
+    Arquitectura: (50,) | batch=200 | Adam lr=0.001
+    l2 aplicado: 2.500e-05   (alpha de sklearn: 0.01)
+    Criterio de parada: val_accuracy + split estratificado (como sklearn)
+    Parametros entrenables: 23,404
+    Epocas corridas: 39 (tope 300, paciencia 15)
+    F1 macro train: 0.5818
+    F1 macro val  : 0.4809
+    Brecha        : 0.1010
+
+  RESUMEN DEL EXPERIMENTO 3
+    sklearn MLPClassifier : 0.4969
+    Keras ingenuo         : 0.4731 (-0.0238)
+    Keras alineado        : 0.4809 (-0.0160)
+
+    Explicado por las 3 correcciones: 33%
+
+  -> CONCLUSION: queda 0.0160 sin explicar, atribuible al
+     epsilon de Adam y a la inicializacion/orden de batches. Lo
+     defendible es que son EQUIVALENTES EN METODO, no identicas
+     en resultado.
+  Grafico: Graficos/modelo4_mlp_fig8_sklearn_vs_keras.png
+
+==============================================================================
+COMPARATIVA DE TODOS LOS MODELOS (validacion)
+==============================================================================
+  (CatBoost usa otra codificacion de entrada; su F1 val es 0.6392
+   segun su propio informe, no se recalcula aqui.)
+                MLP (red neuronal)  Regresion Logistica  Random Forest
+Accuracy (val)              0.5024               0.4746         0.5113
+F1 macro (val)              0.4969               0.4570         0.4825
+
+##############################################################################
+FIN MODELO 4
+##############################################################################
+Guardado: modelos/modelo4_mlp.joblib
+Siguiente: python 05_graficos.py mlp

@@ -10,7 +10,8 @@
 # el orden de categorias del OneHotEncoder o el generador aleatorio, y ahi
 # los .npy dejarian de coincidir y los modelos ya no serian comparables.
 #
-# Estas son las versiones con las que se entrenaron los modelos 1, 2 y 3.
+# Estas son las versiones con las que se entrenaron todos los modelos de
+# entrenamiento_v1 y entrenamiento_v2.
 # Python 3.13.3
 
 # --- Nucleo: usado por TODOS los scripts ---
@@ -21,18 +22,25 @@ joblib==1.5.2
 openpyxl==3.1.5          # lectura de los .xlsx
 matplotlib==3.10.7       # graficos de diagnostico
 
-# --- Modelo 3: CatBoost ---
+# --- CatBoost ---
 catboost==1.2.10
 
-# --- Modelos pendientes (descomentar cuando se entrenen) ---
-# Modelo 4: XGBoost
-# xgboost==2.1.3
+# --- MLP / red neuronal ---
+# El MLP principal usa sklearn.neural_network.MLPClassifier (ya viene en
+# scikit-learn, no requiere nada extra).
 #
-# Modelo 5: MLP / red neuronal.
-# Nota: el MLP puede hacerse con sklearn.neural_network.MLPClassifier, que ya
-# viene en scikit-learn y no requiere instalar nada extra. Solo hace falta
-# TensorFlow si se opta por construir la red con Keras.
-# tensorflow==2.18.0
+# TensorFlow hace falta SOLO para el Experimento 3 de
+# entrenamiento_v2/06_modelo_mlp_v2.py: entrenar la MISMA arquitectura en
+# Keras para medir si el resultado depende de la libreria o de los
+# hiperparametros. Si no lo instalas, el script corre igual y salta ese
+# experimento (esta envuelto en un try/ImportError).
+#
+# OJO CON LA VERSION: tensorflow 2.18 NO existe para Python 3.13
+# (el soporte de 3.13 llego en 2.20). Pesa ~600 MB.
+tensorflow==2.20.0       # arrastra keras 3.15.1
+
+# --- XGBoost ---
+xgboost==3.4.1
 
 # --- Aplicacion final (Etapa 9, aun no empezada) ---
 # streamlit==1.41.1

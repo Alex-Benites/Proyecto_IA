@@ -1,33 +1,51 @@
 # ---------------------------------------------------------------------------
 # ARCHIVOS GENERADOS - no se suben porque son REGENERABLES y pesados.
 #
-# Cualquiera puede recrearlos corriendo:
-#     python 03_preparacion.py      -> los .npy y el preprocesador
-#     python 04/07/08_modelo_*.py   -> los modelos entrenados
+# Patrones con "**/" para que apliquen tanto en la raiz como dentro de
+# entrenamiento_v1/, entrenamiento_v2/ y cualquier carpeta similar futura.
+#
+# Cualquiera puede recrearlos corriendo, dentro de cada carpeta:
+#     python 0X_preparacion*.py    -> los .npy y el preprocesador
+#     python 0X_modelo_*.py        -> los modelos entrenados
 #
 # El pipeline es determinista (SEMILLA=42), asi que todos obtienen
 # exactamente los mismos archivos. Verificado por hash MD5.
 # ---------------------------------------------------------------------------
 
-# Matrices de features (train_X.npy solo pesa 54 MB)
-data/processed/*.npy
+# Matrices de features (train_X.npy puede pesar 50+ MB)
+**/data/processed/*.npy
+**/data/*.npy
 
-# Splits intermedios en texto (regenerables por 03_preparacion.py)
-data/processed/train_raw.csv
-data/processed/val_raw.csv
-data/processed/test_raw.csv
+# Splits intermedios en texto (regenerables por el script de preparacion)
+**/data/*_train_raw.csv
+**/data/*_val_raw.csv
+**/data/*_test_raw.csv
+**/data/processed/train_raw.csv
+**/data/processed/val_raw.csv
+**/data/processed/test_raw.csv
 
-# Modelos entrenados. modelo2_randomforest.joblib pesa 70 MB: GitHub
-# advierte sobre archivos >50 MB y rechaza los >100 MB.
-modelos/*.joblib
-modelos/*.cbm
+# Modelos entrenados. Algunos superan 50-70 MB: GitHub advierte >50 MB y
+# rechaza >100 MB (randomforest_variante_a.joblib pesa 84 MB).
+**/modelos/*.joblib
+**/modelos/*.cbm
+# Redes de Keras (experimento 3 del MLP). OJO: .gitignore NO admite
+# comentarios al final de la linea, van siempre en su propia linea.
+**/modelos/*.keras
 
-# Datos limpios intermedios (los regenera 02_limpieza.py)
+# EXCEPCION: los 2 artefactos que la APP necesita en runtime.
+# Pesan 0,55 MB entre los dos, asi que se versionan para que quien haga la
+# app pueda clonar y arrancar sin reentrenar nada.
+# (El '!' des-ignora un archivo puntual; el resto sigue ignorado.)
+!entrenamiento_v2/modelos/mlp_variante_b.joblib
+!entrenamiento_v2/modelos/preprocesador_variante_b.joblib
+
+# Datos limpios intermedios (los regenera 02_limpieza.py, vive en la raiz
+# y lo usan tanto entrenamiento_v1 como entrenamiento_v2)
 data/processed/A_2014_2025_limpio.csv
 data/processed/B_2026_limpio.csv
 
 # Logs de entrenamiento que CatBoost crea solo en cada corrida
-catboost_info/
+**/catboost_info/
 
 # ---------------------------------------------------------------------------
 # Python

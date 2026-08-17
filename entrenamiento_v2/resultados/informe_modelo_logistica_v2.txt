@@ -1,0 +1,195 @@
+
+##############################################################################
+ENTRENAMIENTO V2 - REGRESION LOGISTICA MULTINOMIAL
+##############################################################################
+Python 3.13.3 | scikit-learn 1.8.0 | semilla 42
+Datos: matrices .npy generadas por 01_preparacion_v2.py
+(preprocesador ajustado SOLO con train de cada variante)
+
+==============================================================================
+VARIANTE A (class_weight=balanced)
+==============================================================================
+  train: (30782, 495)   val: (6596, 495)
+
+  Distribucion real en train:
+    ARMA_FUEGO         24,433  (79.37%)
+    ARMA_BLANCA         3,865  (12.56%)
+    ARMA_CONTUNDENTE      826  ( 2.68%)
+    OTRAS               1,658  ( 5.39%)
+
+  Pesos que aplica class_weight='balanced'  [ n / (n_clases * n_clase) ]:
+    ARMA_FUEGO         peso =  0.315
+    ARMA_BLANCA        peso =  1.991
+    ARMA_CONTUNDENTE   peso =  9.317
+    OTRAS              peso =  4.641
+
+  EXPERIMENTO 1: regularizacion C (VARIANTE A)
+         C |  F1 train |    F1 val |  brecha |  |w| medio |  iter
+  ------------------------------------------------------------------
+      0.01 |    0.4643 |    0.4468 |  0.0175 |     0.0602 |    85
+      0.05 |    0.4768 |    0.4511 |  0.0257 |     0.1334 |   154
+      0.10 |    0.4823 |    0.4508 |  0.0315 |     0.1812 |   156
+      0.50 |    0.4872 |    0.4460 |  0.0411 |     0.3259 |   229
+      1.00 |    0.4876 |    0.4445 |  0.0431 |     0.3989 |   259
+      5.00 |    0.4871 |    0.4446 |  0.0426 |     0.5898 |   431
+     10.00 |    0.4875 |    0.4442 |  0.0433 |     0.6930 |   496
+
+  Mejor F1 val absoluto : 0.4511 (C=0.05)
+  Umbral de parsimonia  : 0.4466 (99% del mejor)
+  ELEGIDO               : C=0.01 -> F1 val 0.4468
+  Razon: es el C mas chico (mas regularizado, pesos mas chicos) que
+         se mantiene dentro del 1% del mejor resultado.
+
+  HIPERPARAMETROS FINALES (VARIANTE A):
+    C = 0.01
+    max_iter = 3000
+    class_weight = balanced
+    random_state = 42
+    solver = lbfgs        (DEFAULT de sklearn)
+    penalty = 'l2'        (DEFAULT de sklearn)
+    tol = 1e-4            (DEFAULT de sklearn)
+    fit_intercept = True  (DEFAULT de sklearn)
+
+    Convergio en 85 iteraciones (max 3000).
+
+    --- TRAIN ---
+    Accuracy         : 0.7368
+    Precision (macro): 0.4428
+    Recall (macro)   : 0.5548
+    F1 (macro)       : 0.4643
+
+    --- VALIDACION ---
+    Accuracy         : 0.7315
+    Precision (macro): 0.4311
+    Recall (macro)   : 0.5301
+    F1 (macro)       : 0.4468
+
+  OVERFITTING / UNDERFITTING: brecha F1 train-val = 0.0175
+    -> Posible UNDERFITTING (ni en train aprende bien).
+
+  Reporte por clase (validacion):
+                  precision    recall  f1-score   support
+
+      ARMA_FUEGO       0.95      0.81      0.88      5236
+     ARMA_BLANCA       0.42      0.39      0.41       828
+ARMA_CONTUNDENTE       0.13      0.42      0.20       177
+           OTRAS       0.22      0.49      0.30       355
+
+        accuracy                           0.73      6596
+       macro avg       0.43      0.53      0.45      6596
+    weighted avg       0.83      0.73      0.77      6596
+
+                       pred_ARMA_FUEGO  pred_ARMA_BLANCA  pred_ARMA_CONTUNDENTE  pred_OTRAS
+real_ARMA_FUEGO                   4249               369                    245         373
+real_ARMA_BLANCA                   121               327                    171         209
+real_ARMA_CONTUNDENTE               26                34                     75          42
+real_OTRAS                          54                49                     78         174
+
+==============================================================================
+VARIANTE B (class_weight=None)
+==============================================================================
+  train: (10409, 457)   val: (2230, 457)
+
+  Distribucion real en train:
+    ARMA_FUEGO          4,060  (39.00%)
+    ARMA_BLANCA         3,865  (37.13%)
+    ARMA_CONTUNDENTE      826  ( 7.94%)
+    OTRAS               1,658  (15.93%)
+
+  EXPERIMENTO 1: regularizacion C (VARIANTE B)
+         C |  F1 train |    F1 val |  brecha |  |w| medio |  iter
+  ------------------------------------------------------------------
+      0.01 |    0.4413 |    0.4495 | -0.0082 |     0.0332 |    47
+      0.05 |    0.4790 |    0.4819 | -0.0028 |     0.0750 |    88
+      0.10 |    0.4914 |    0.4894 |  0.0020 |     0.1051 |    87
+      0.50 |    0.5193 |    0.5037 |  0.0156 |     0.2143 |   145
+      1.00 |    0.5295 |    0.5029 |  0.0267 |     0.2832 |   192
+      5.00 |    0.5398 |    0.5051 |  0.0347 |     0.4577 |   315
+     10.00 |    0.5421 |    0.5085 |  0.0336 |     0.5418 |   349
+
+  Mejor F1 val absoluto : 0.5085 (C=10.0)
+  Umbral de parsimonia  : 0.5034 (99% del mejor)
+  ELEGIDO               : C=0.5 -> F1 val 0.5037
+  Razon: es el C mas chico (mas regularizado, pesos mas chicos) que
+         se mantiene dentro del 1% del mejor resultado.
+
+  HIPERPARAMETROS FINALES (VARIANTE B):
+    C = 0.5
+    max_iter = 3000
+    class_weight = None
+    random_state = 42
+    solver = lbfgs        (DEFAULT de sklearn)
+    penalty = 'l2'        (DEFAULT de sklearn)
+    tol = 1e-4            (DEFAULT de sklearn)
+    fit_intercept = True  (DEFAULT de sklearn)
+
+    Convergio en 145 iteraciones (max 3000).
+
+    --- TRAIN ---
+    Accuracy         : 0.6721
+    Precision (macro): 0.6218
+    Recall (macro)   : 0.5135
+    F1 (macro)       : 0.5193
+
+    --- VALIDACION ---
+    Accuracy         : 0.6686
+    Precision (macro): 0.5834
+    Recall (macro)   : 0.5024
+    F1 (macro)       : 0.5037
+
+  OVERFITTING / UNDERFITTING: brecha F1 train-val = 0.0156
+    -> Sin senales fuertes de over/underfitting.
+
+  Reporte por clase (validacion):
+                  precision    recall  f1-score   support
+
+      ARMA_FUEGO       0.76      0.84      0.80       870
+     ARMA_BLANCA       0.61      0.75      0.67       828
+ARMA_CONTUNDENTE       0.41      0.06      0.11       177
+           OTRAS       0.55      0.35      0.43       355
+
+        accuracy                           0.67      2230
+       macro avg       0.58      0.50      0.50      2230
+    weighted avg       0.65      0.67      0.64      2230
+
+                       pred_ARMA_FUEGO  pred_ARMA_BLANCA  pred_ARMA_CONTUNDENTE  pred_OTRAS
+real_ARMA_FUEGO                    733               122                      0          15
+real_ARMA_BLANCA                   134               621                     11          62
+real_ARMA_CONTUNDENTE               25               115                     11          26
+real_OTRAS                          68               156                      5         126
+
+==============================================================================
+COMPARACION DIRECTA A vs B
+==============================================================================
+                  Variante A (class_weight)  Variante B (recorte)
+C elegido                            0.0100                0.5000
+Accuracy (val)                       0.7315                0.6686
+F1 macro (val)                       0.4468                0.5037
+Brecha train-val                     0.0175                0.0156
+
+==============================================================================
+COMPARACION CONTRA LA LOGISTICA DE V1 (dataset.xlsx)
+==============================================================================
+  V1 (dataset.xlsx, con filas fabricadas, C=1.0 por defecto, sin class_weight):
+      Accuracy val 0.5939 | F1 macro val 0.5923 | brecha 0.027
+  V2 Variante A: Accuracy val 0.7315 | F1 macro val 0.4468 | brecha 0.0175
+  V2 Variante B: Accuracy val 0.6686 | F1 macro val 0.5037 | brecha 0.0156
+
+  NO son comparables como 'quien es mejor': V1 se evalua sobre un val
+  que tambien contiene filas fabricadas y clases artificialmente
+  equilibradas (25% cada una), asi que su F1 macro esta inflado. La
+  comparacion util es entre A y B, que si comparten fuente real.
+
+==============================================================================
+GRAFICOS
+==============================================================================
+  Graficos/logistica_v2_barrido_C.png
+  Graficos/logistica_v2_matrices_confusion.png
+  Graficos/logistica_v2_comparacion.png
+  Graficos/logistica_v2_coeficientes_variante_a.png
+  Graficos/logistica_v2_coeficientes_variante_b.png
+
+##############################################################################
+FIN
+##############################################################################
+Guardado: modelos/logistica_variante_a.joblib, logistica_variante_b.joblib

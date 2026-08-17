@@ -1,0 +1,86 @@
+
+##############################################################################
+ENTRENAMIENTO V2 - PREPARACION (datos 100% reales)
+##############################################################################
+Python 3.13.3 | pandas 2.3.1 | semilla 42
+
+Fuente: A_2014_2025_limpio.csv + B_2026_limpio.csv (datos oficiales,
+ninguna fila fabricada). Columnas eliminadas ademas de las de leakage
+ya conocidas: ['anio', 'mes'] (ver docstring: fuente de fuga en V1,
+aca se excluyen por consistencia aunque no hay evidencia de fuga real).
+
+Total de casos reales disponibles: 43,975
+  ARMA_FUEGO         34,905
+  ARMA_BLANCA         5,521
+  ARMA_CONTUNDENTE    1,180
+  OTRAS               2,369
+
+==============================================================================
+VARIANTE A: datos completos + class_weight='balanced' (al entrenar)
+==============================================================================
+  No se descarta NINGUN caso real. El desbalance se compensa en cada
+  modelo con su propio mecanismo de peso por clase (ver scripts de modelo).
+
+  Split de variante_a (70/15/15, semilla=42):
+    train: 30,782 filas
+         ARMA_FUEGO         24,433  (79.37%)
+         ARMA_BLANCA         3,865  (12.56%)
+         ARMA_CONTUNDENTE      826  ( 2.68%)
+         OTRAS               1,658  ( 5.39%)
+    val: 6,596 filas
+         ARMA_FUEGO          5,236  (79.38%)
+         ARMA_BLANCA           828  (12.55%)
+         ARMA_CONTUNDENTE      177  ( 2.68%)
+         OTRAS                 355  ( 5.38%)
+    test: 6,597 filas
+         ARMA_FUEGO          5,236  (79.37%)
+         ARMA_BLANCA           828  (12.55%)
+         ARMA_CONTUNDENTE      177  ( 2.68%)
+         OTRAS                 356  ( 5.40%)
+
+    Preprocesador ajustado SOLO con train:
+      mediana de 'edad' usada para imputar: 30.0
+      nulos de 'edad' en train: 702 de 30,782
+      dimension tras one-hot: 495 columnas (1 numerica + 493 dummies + 1 binaria)
+
+==============================================================================
+VARIANTE B: ARMA_FUEGO recortado a 5,800 (de 34,905 reales), sin ajuste adicional
+==============================================================================
+  Total Variante B: 14,870 filas
+    ARMA_FUEGO          5,800  (39.00%)
+    ARMA_BLANCA         5,521  (37.13%)
+    ARMA_CONTUNDENTE    1,180  ( 7.94%)
+    OTRAS               2,369  (15.93%)
+
+  Split de variante_b (70/15/15, semilla=42):
+    train: 10,409 filas
+         ARMA_FUEGO          4,060  (39.00%)
+         ARMA_BLANCA         3,865  (37.13%)
+         ARMA_CONTUNDENTE      826  ( 7.94%)
+         OTRAS               1,658  (15.93%)
+    val: 2,230 filas
+         ARMA_FUEGO            870  (39.01%)
+         ARMA_BLANCA           828  (37.13%)
+         ARMA_CONTUNDENTE      177  ( 7.94%)
+         OTRAS                 355  (15.92%)
+    test: 2,231 filas
+         ARMA_FUEGO            870  (39.00%)
+         ARMA_BLANCA           828  (37.11%)
+         ARMA_CONTUNDENTE      177  ( 7.93%)
+         OTRAS                 356  (15.96%)
+
+    Preprocesador ajustado SOLO con train:
+      mediana de 'edad' usada para imputar: 31.0
+      nulos de 'edad' en train: 307 de 10,409
+      dimension tras one-hot: 457 columnas (1 numerica + 455 dummies + 1 binaria)
+
+##############################################################################
+FIN DE LA PREPARACION V2
+##############################################################################
+Guardado en entrenamiento_v2/data/:
+  variante_{a,b}_{train,val,test}_raw.csv  -> texto (lo usa CatBoost nativo)
+  variante_{a,b}_{train,val,test}_X.npy    -> matriz one-hot + escalada
+  variante_{a,b}_{train,val,test}_y.npy    -> etiquetas
+  variante_{a,b}_columnas.npy              -> nombre de cada columna de X
+Guardado en entrenamiento_v2/modelos/:
+  preprocesador_variante_{a,b}.joblib      -> para la app final

@@ -1,0 +1,72 @@
+
+##############################################################################
+ETAPA 4 - MODELO 1: REGRESION LOGISTICA MULTINOMIAL
+##############################################################################
+Python 3.13.3 | scikit-learn 1.8.0 | semilla 42
+
+Train: (14630, 463)  |  Val: (3135, 463)
+
+==============================================================================
+HIPERPARAMETROS (todos explicitos, sin busqueda automatica)
+==============================================================================
+  max_iter = 2000
+  random_state = 42
+  solver = lbfgs (por defecto). Maneja softmax multinomial de forma nativa.
+  class_weight = None (dataset ya balanceado artificialmente, ver docstring).
+
+  Convergio en 306 iteraciones (de un maximo de 2000).
+
+==============================================================================
+METRICAS
+==============================================================================
+
+  --- TRAIN ---
+  Accuracy         : 0.4995
+  Precision (macro): 0.4909
+  Recall (macro)   : 0.4961
+  F1 (macro)       : 0.4825
+
+  --- VALIDACION ---
+  Accuracy         : 0.4746
+  Precision (macro): 0.4611
+  Recall (macro)   : 0.4713
+  F1 (macro)       : 0.4570
+
+==============================================================================
+CHEQUEO DE OVERFITTING / UNDERFITTING
+==============================================================================
+  F1 macro train : 0.4825
+  F1 macro val   : 0.4570
+  Diferencia     : 0.0255
+  -> Posible UNDERFITTING (ni siquiera en train el modelo aprende bien).
+
+==============================================================================
+REPORTE POR CLASE (VALIDACION)
+==============================================================================
+                  precision    recall  f1-score   support
+
+      ARMA_FUEGO       0.44      0.65      0.53       769
+     ARMA_BLANCA       0.61      0.66      0.63       828
+ARMA_CONTUNDENTE       0.36      0.25      0.29       777
+           OTRAS       0.43      0.33      0.37       761
+
+        accuracy                           0.47      3135
+       macro avg       0.46      0.47      0.46      3135
+    weighted avg       0.46      0.47      0.46      3135
+
+
+==============================================================================
+MATRIZ DE CONFUSION (VALIDACION)
+==============================================================================
+                       pred_ARMA_FUEGO  pred_ARMA_BLANCA  pred_ARMA_CONTUNDENTE  pred_OTRAS
+real_ARMA_FUEGO                    497                42                    152          78
+real_ARMA_BLANCA                    84               546                     68         130
+real_ARMA_CONTUNDENTE              324               132                    192         129
+real_OTRAS                         213               177                    118         253
+
+Guardado grafico: resultados\modelos\matriz_confusion_modelo1.png
+
+##############################################################################
+FIN MODELO 1
+##############################################################################
+Guardado: modelos/modelo1_logistica.joblib

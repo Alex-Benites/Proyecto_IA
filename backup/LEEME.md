@@ -17,6 +17,23 @@ Otros motivos generales:
 - No documentan las decisiones por columna ni el análisis de leakage.
 - No separan transformaciones deterministas de las que aprenden parámetros.
 
+### Aclaración: XGBoost y Keras SÍ se usan en el proyecto actual
+
+Puede parecer contradictorio que se descartara `02_modelos.py` por usar
+XGBoost y Keras, y que el pipeline actual los use igual. La diferencia no es
+la librería, es **cómo**:
+
+| | `backup/02_modelos.py` | Pipeline actual |
+|---|---|---|
+| Hiperparámetros | los defaults, sin justificar | elegidos con experimentos manuales documentados (barridos de `learning_rate`, `max_depth`, arquitectura, `alpha`, `C`) |
+| Fórmula del algoritmo | no se explica | escrita en el docstring de cada script |
+| Keras | red montada sin explicar la arquitectura | `06_modelo_mlp_v2.py` la usa como **experimento controlado** contra sklearn, documentando las 3 diferencias de traducción entre librerías |
+| Interpretabilidad | no se reporta | `feature_importances_` en XGBoost, importancia por permutación en el MLP |
+
+"Sin cajas negras" nunca significó "sin estas librerías": significa que no se
+acepta ningún hiperparámetro ni ningún resultado sin poder explicar de dónde
+sale.
+
 ## ¿Interfieren con el pipeline actual?
 
 No. Usan nombres de archivo completamente distintos, así que ni siquiera

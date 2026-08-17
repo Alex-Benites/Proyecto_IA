@@ -1,0 +1,324 @@
+
+##############################################################################
+ENTRENAMIENTO V2 - XGBOOST
+##############################################################################
+Python 3.13.3 | xgboost 3.4.1 | semilla 42
+Datos: los mismos .npy que usan logistica, Random Forest y MLP.
+(XGBoost necesita numeros; no maneja texto como CatBoost)
+
+==============================================================================
+VARIANTE A (balanceo de clases: si)
+==============================================================================
+  train: (30782, 495)   val: (6596, 495)
+  Etiquetas codificadas a 0..3: ['ARMA_BLANCA', 'ARMA_CONTUNDENTE', 'ARMA_FUEGO', 'OTRAS']
+
+  Distribucion real en train:
+    ARMA_FUEGO         24,433  (79.37%)
+    ARMA_BLANCA         3,865  (12.56%)
+    ARMA_CONTUNDENTE      826  ( 2.68%)
+    OTRAS               1,658  ( 5.39%)
+
+  XGBoost NO tiene class_weight para multiclase
+  (scale_pos_weight es solo binario). Se usa sample_weight, igual
+  que en el MLP: un peso por FILA = n / (n_clases * n_su_clase).
+    ARMA_FUEGO         peso =  0.315
+    ARMA_BLANCA        peso =  1.991
+    ARMA_CONTUNDENTE   peso =  9.317
+    OTRAS              peso =  4.641
+
+  EXPERIMENTO 1: learning_rate (VARIANTE A)
+  eta controla cuanto corrige CADA arbol nuevo. El early stopping
+  (paciencia 50) decide cuantos arboles usar en cada caso.
+
+      lr |  arboles |  F1 train |    F1 val |  brecha
+  ----------------------------------------------------
+    0.03 |     1500 |    0.6527 |    0.4835 |  0.1691
+    0.06 |     1500 |    0.7236 |    0.4848 |  0.2389
+    0.10 |     1500 |    0.7977 |    0.4942 |  0.3035
+    0.20 |     1288 |    0.8907 |    0.4894 |  0.4012
+    0.30 |      985 |    0.9200 |    0.4944 |  0.4255
+
+  Mejor F1 val absoluto : 0.4944 (lr=0.3)
+  Umbral de parsimonia  : 0.4895 (99% del mejor)
+  ELEGIDO               : lr=0.1 -> F1 val 0.4942
+
+  EXPERIMENTO 2: max_depth (VARIANTE A, lr=0.1)
+  XGBoost hace arboles ASIMETRICOS: cada rama parte por donde le
+  conviene. Eso le da mas capacidad por arbol que CatBoost (que los
+  hace simetricos), y por eso max_depth pesa mucho mas aca.
+
+   max_depth |  arboles |  F1 train |    F1 val |  brecha
+  --------------------------------------------------------
+           3 |     1500 |    0.5938 |    0.4672 |  0.1266
+           4 |     1500 |    0.6615 |    0.4760 |  0.1854
+           6 |     1500 |    0.7977 |    0.4942 |  0.3035
+           8 |     1497 |    0.9104 |    0.4944 |  0.4161
+          10 |      965 |    0.9285 |    0.5034 |  0.4250
+          12 |      631 |    0.9299 |    0.5004 |  0.4295
+
+  Mejor F1 val absoluto : 0.5034 (depth=10)
+  Umbral de parsimonia  : 0.4984 (99% del mejor)
+  ELEGIDO               : max_depth=10 -> F1 val 0.5034
+  Razon: el arbol MAS SIMPLE dentro del 1% del mejor.
+
+  HIPERPARAMETROS FINALES (VARIANTE A):
+    learning_rate = 0.1          (experimento 1)
+    max_depth = 10                (experimento 2)
+    n_estimators = 965        (lo fijo el early stopping)
+    objective = 'multi:softprob'  (LogLoss multinomial)
+    eval_metric = 'mlogloss'
+    tree_method = 'hist'          (DEFAULT desde XGBoost 2.0)
+    reg_lambda = 1.0              (DEFAULT: el lambda de Omega)
+    gamma = 0.0                   (DEFAULT: ganancia minima por hoja)
+    subsample = 1.0               (DEFAULT: usa todas las filas)
+    colsample_bytree = 1.0        (DEFAULT: usa todas las columnas)
+    min_child_weight = 1          (DEFAULT: hessiano minimo por hoja)
+    random_state = 42
+
+    --- TRAIN ---
+    Accuracy         : 0.9556
+    Precision (macro): 0.8881
+    Recall (macro)   : 0.9764
+    F1 (macro)       : 0.9285
+
+    --- VALIDACION ---
+    Accuracy         : 0.8129
+    Precision (macro): 0.4991
+    Recall (macro)   : 0.5124
+    F1 (macro)       : 0.5034
+
+  OVERFITTING / UNDERFITTING: brecha F1 train-val = 0.4250
+    -> OVERFITTING: el boosting memoriza parte del train.
+
+  Reporte por clase (validacion):
+                  precision    recall  f1-score   support
+
+      ARMA_FUEGO       0.93      0.90      0.91      5236
+     ARMA_BLANCA       0.46      0.59      0.52       828
+ARMA_CONTUNDENTE       0.17      0.15      0.16       177
+           OTRAS       0.43      0.42      0.42       355
+
+        accuracy                           0.81      6596
+       macro avg       0.50      0.51      0.50      6596
+    weighted avg       0.83      0.81      0.82      6596
+
+                       pred_ARMA_FUEGO  pred_ARMA_BLANCA  pred_ARMA_CONTUNDENTE  pred_OTRAS
+real_ARMA_FUEGO                   4701               392                     48          95
+real_ARMA_BLANCA                   216               487                     49          76
+real_ARMA_CONTUNDENTE               44                82                     26          25
+real_OTRAS                          83                98                     26         148
+
+  Top 15 columnas por importancia (gain normalizado):
+    presun_motiva_observada_TRAFICO INTERNACIONAL DE   0.02117
+    presunta_motivacion_DELINCUENCIA COMUN             0.01315
+    lugar_CENTROS DE REHABILITACION SOCIAL             0.01236
+    presun_motiva_observada_TRAFICO INTERNO DE DROGA   0.01020
+    lugar_VIA PUBLICA                                  0.00781
+    presun_motiva_observada_RINAS                      0.00700
+    provincia_PICHINCHA                                0.00643
+    presun_motiva_observada_TRAFICO INTERNOS DE DROG   0.00634
+    lugar_CANCHAS DE USO MULTIPLE                      0.00592
+    presunta_motivacion_TRANSNACIONAL                  0.00548
+    provincia_CHIMBORAZO                               0.00535
+    canton_LA TRONCAL                                  0.00527
+    provincia_LOS RIOS                                 0.00524
+    provincia_MORONA SANTIAGO                          0.00524
+    presun_motiva_observada_DEUDAS                     0.00516
+
+==============================================================================
+VARIANTE B (balanceo de clases: no)
+==============================================================================
+  train: (10409, 457)   val: (2230, 457)
+  Etiquetas codificadas a 0..3: ['ARMA_BLANCA', 'ARMA_CONTUNDENTE', 'ARMA_FUEGO', 'OTRAS']
+
+  Distribucion real en train:
+    ARMA_FUEGO          4,060  (39.00%)
+    ARMA_BLANCA         3,865  (37.13%)
+    ARMA_CONTUNDENTE      826  ( 7.94%)
+    OTRAS               1,658  (15.93%)
+
+  EXPERIMENTO 1: learning_rate (VARIANTE B)
+  eta controla cuanto corrige CADA arbol nuevo. El early stopping
+  (paciencia 50) decide cuantos arboles usar en cada caso.
+
+      lr |  arboles |  F1 train |    F1 val |  brecha
+  ----------------------------------------------------
+    0.03 |      645 |    0.6481 |    0.5162 |  0.1319
+    0.06 |      358 |    0.6587 |    0.5180 |  0.1407
+    0.10 |      208 |    0.6606 |    0.5167 |  0.1439
+    0.20 |      106 |    0.6701 |    0.5214 |  0.1487
+    0.30 |       76 |    0.6705 |    0.5231 |  0.1474
+
+  Mejor F1 val absoluto : 0.5231 (lr=0.3)
+  Umbral de parsimonia  : 0.5179 (99% del mejor)
+  ELEGIDO               : lr=0.06 -> F1 val 0.5180
+
+  EXPERIMENTO 2: max_depth (VARIANTE B, lr=0.06)
+  XGBoost hace arboles ASIMETRICOS: cada rama parte por donde le
+  conviene. Eso le da mas capacidad por arbol que CatBoost (que los
+  hace simetricos), y por eso max_depth pesa mucho mas aca.
+
+   max_depth |  arboles |  F1 train |    F1 val |  brecha
+  --------------------------------------------------------
+           3 |      972 |    0.5838 |    0.5125 |  0.0713
+           4 |      665 |    0.6134 |    0.5131 |  0.1002
+           6 |      358 |    0.6587 |    0.5180 |  0.1407
+           8 |      237 |    0.7144 |    0.5108 |  0.2037
+          10 |      151 |    0.7609 |    0.5282 |  0.2327
+          12 |      121 |    0.8130 |    0.5228 |  0.2902
+
+  Mejor F1 val absoluto : 0.5282 (depth=10)
+  Umbral de parsimonia  : 0.5229 (99% del mejor)
+  ELEGIDO               : max_depth=10 -> F1 val 0.5282
+  Razon: el arbol MAS SIMPLE dentro del 1% del mejor.
+
+  HIPERPARAMETROS FINALES (VARIANTE B):
+    learning_rate = 0.06          (experimento 1)
+    max_depth = 10                (experimento 2)
+    n_estimators = 151        (lo fijo el early stopping)
+    objective = 'multi:softprob'  (LogLoss multinomial)
+    eval_metric = 'mlogloss'
+    tree_method = 'hist'          (DEFAULT desde XGBoost 2.0)
+    reg_lambda = 1.0              (DEFAULT: el lambda de Omega)
+    gamma = 0.0                   (DEFAULT: ganancia minima por hoja)
+    subsample = 1.0               (DEFAULT: usa todas las filas)
+    colsample_bytree = 1.0        (DEFAULT: usa todas las columnas)
+    min_child_weight = 1          (DEFAULT: hessiano minimo por hoja)
+    random_state = 42
+
+    --- TRAIN ---
+    Accuracy         : 0.8252
+    Precision (macro): 0.8777
+    Recall (macro)   : 0.7176
+    F1 (macro)       : 0.7609
+
+    --- VALIDACION ---
+    Accuracy         : 0.6807
+    Precision (macro): 0.5898
+    Recall (macro)   : 0.5202
+    F1 (macro)       : 0.5282
+
+  OVERFITTING / UNDERFITTING: brecha F1 train-val = 0.2327
+    -> OVERFITTING: el boosting memoriza parte del train.
+
+  Reporte por clase (validacion):
+                  precision    recall  f1-score   support
+
+      ARMA_FUEGO       0.77      0.85      0.81       870
+     ARMA_BLANCA       0.63      0.76      0.69       828
+ARMA_CONTUNDENTE       0.35      0.10      0.16       177
+           OTRAS       0.61      0.37      0.46       355
+
+        accuracy                           0.68      2230
+       macro avg       0.59      0.52      0.53      2230
+    weighted avg       0.66      0.68      0.66      2230
+
+                       pred_ARMA_FUEGO  pred_ARMA_BLANCA  pred_ARMA_CONTUNDENTE  pred_OTRAS
+real_ARMA_FUEGO                    740               110                      4          16
+real_ARMA_BLANCA                   136               629                     17          46
+real_ARMA_CONTUNDENTE               29               108                     18          22
+real_OTRAS                          57               155                     12         131
+
+  Top 15 columnas por importancia (gain normalizado):
+    presunta_motivacion_DELINCUENCIA COMUN             0.05359
+    presun_motiva_observada_TRAFICO INTERNACIONAL DE   0.02869
+    presun_motiva_observada_RINAS                      0.02560
+    presun_motiva_observada_TRAFICO INTERNO DE DROGA   0.01636
+    lugar_VIA PUBLICA                                  0.01417
+    lugar_CENTROS DE REHABILITACION SOCIAL             0.01354
+    provincia_PICHINCHA                                0.01307
+    presun_motiva_observada_ROBO A PERSONAS            0.01046
+    nacionalidad_DESCONOCIDO                           0.00985
+    presunta_motivacion_VIOLENCIA INTRAFAMILIAR        0.00976
+    presun_motiva_observada_LINCHAMIENTO               0.00938
+    presun_motiva_observada_DEUDAS                     0.00896
+    sexo_HOMBRE                                        0.00763
+    lugar_FINCA                                        0.00756
+    presun_motiva_observada_TRAFICO INTERNOS DE DROG   0.00708
+
+==============================================================================
+EXPERIMENTO 3: XGBOOST vs CATBOOST (los dos boostings)
+==============================================================================
+  Mismo paradigma (arboles secuenciales que corrigen residuos) y
+  misma particion. Las diferencias:
+    - XGBoost: arboles ASIMETRICOS, aproximacion de 2do orden
+      (gradiente + hessiano), categoricas via one-hot.
+    - CatBoost: arboles SIMETRICOS, categoricas nativas con
+      ordered target statistics.
+
+  Variante A: XGBoost 0.5034 vs CatBoost 0.4838  (+0.0196)
+  Variante B: XGBoost 0.5282 vs CatBoost 0.5057  (+0.0225)
+
+  XGBoost eligio max_depth=10 (A) y 10 (B);
+  CatBoost se quedo con depth=6 en las dos.
+  XGBoost eligio arboles MAS PROFUNDOS, no mas superficiales.
+  Esto CONTRADICE la intuicion de que sus arboles asimetricos, al
+  tener mas capacidad por nivel, necesitarian menos profundidad.
+  La explicacion esta en la brecha train-val: XGBoost gana ese
+  +0.02 de F1 val a costa de memorizar (brecha 0.425 en A y 0.233 en B, contra 0.057 y
+  0.041 de CatBoost). No es que aprenda mejor: es que se le permite
+  ajustar mas, y la validacion todavia no lo castiga.
+
+  ADVERTENCIA METODOLOGICA (aplica tambien a CatBoost):
+  el early stopping usa el set de VALIDACION como eval_set, o sea que
+  el numero de arboles se elige mirando el mismo set sobre el que
+  despues se reporta el F1. Eso sesga el resultado hacia arriba. Los
+  modelos SIN early stopping (logistica, Random Forest, MLP) no tienen
+  esta ventaja, asi que la comparacion favorece levemente a los dos
+  boostings. El numero limpio saldra recien del TEST sellado.
+
+==============================================================================
+COMPARACION DIRECTA A vs B
+==============================================================================
+                  Variante A  Variante B
+learning_rate         0.1000      0.0600
+max_depth            10.0000     10.0000
+arboles             965.0000    151.0000
+Accuracy (val)        0.8129      0.6807
+F1 macro (val)        0.5034      0.5282
+Brecha train-val      0.4250      0.2327
+
+==============================================================================
+TABLA FINAL: LOS 5 MODELOS DE V2 (validacion)
+==============================================================================
+                Accuracy (val)  F1 macro (val)  Brecha train-val
+XGBoost B               0.6807          0.5282            0.2327
+MLP B                   0.6780          0.5279            0.0477
+RandomForest A          0.8170          0.5108            0.2717
+CatBoost B              0.6758          0.5057            0.0413
+Logistica B             0.6686          0.5037            0.0156
+XGBoost A               0.8129          0.5034            0.4250
+RandomForest B          0.6843          0.4927            0.1139
+CatBoost A              0.7624          0.4838            0.0573
+MLP A                   0.7576          0.4751            0.0308
+Logistica A             0.7315          0.4468            0.0175
+
+  Mejor F1 macro absoluto: XGBoost B (0.5282)
+
+  PERO EL F1 MACRO SOLO ELIGE MAL. Mirando las dos columnas juntas:
+
+    XGBoost B        F1 0.5282  brecha 0.2327
+    MLP B            F1 0.5279  brecha 0.0477
+    -> diferencia de F1: +0.0003   diferencia de brecha: +0.1850
+    Los dos primeros empatan en F1 (0.0003 de diferencia,
+    ruido), pero XGBoost B memoriza 0.18 mas. A igual
+    rendimiento, MLP B es el modelo defendible.
+
+  Ademas hay que mirar el F1 de ARMA_CONTUNDENTE, que ningun modelo
+  resuelve (el mejor es 0.22 de la logistica A).
+  El set de TEST sigue sellado: no se toca hasta elegir el final.
+
+==============================================================================
+GRAFICOS
+==============================================================================
+  Graficos/xgboost_v2_experimento_learning_rate.png
+  Graficos/xgboost_v2_experimento_max_depth.png
+  Graficos/xgboost_v2_matrices_confusion.png
+  Graficos/xgboost_v2_comparacion.png
+  Graficos/xgboost_v2_experimento_xgb_vs_catboost.png
+  Graficos/xgboost_v2_importancia.png
+
+##############################################################################
+FIN
+##############################################################################
+Guardado: modelos/xgboost_variante_{a,b}.joblib

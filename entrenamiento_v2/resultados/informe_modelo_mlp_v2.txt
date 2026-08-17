@@ -1,0 +1,392 @@
+
+##############################################################################
+ENTRENAMIENTO V2 - RED NEURONAL (MLP)
+##############################################################################
+Python 3.13.3 | scikit-learn 1.8.0 | semilla 42
+
+==============================================================================
+VARIANTE A (balanceo de clases: si)
+==============================================================================
+  train: (30782, 495)   val: (6596, 495)
+
+  Distribucion real en train:
+    ARMA_FUEGO         24,433  (79.37%)
+    ARMA_BLANCA         3,865  (12.56%)
+    ARMA_CONTUNDENTE      826  ( 2.68%)
+    OTRAS               1,658  ( 5.39%)
+
+  MLPClassifier NO tiene class_weight. Se usa sample_weight
+  (un peso por FILA en vez de por clase, equivalente):
+    ARMA_FUEGO         peso =  0.315
+    ARMA_BLANCA        peso =  1.991
+    ARMA_CONTUNDENTE   peso =  9.317
+    OTRAS              peso =  4.641
+
+  EXPERIMENTO 1: arquitectura (VARIANTE A)
+  El default de sklearn es (100,). No es un detalle: es la red entera.
+
+      arquitectura |  parametros | epocas |  F1 train |    F1 val |  brecha
+  ----------------------------------------------------------------------------
+             (50,) |      25,004 |     24 |    0.5154 |    0.4486 |  0.0668
+  (100,) <- default |      50,004 |     26 |    0.5590 |    0.4720 |  0.0869
+            (200,) |     100,004 |     23 |    0.5498 |    0.4572 |  0.0925
+         (100, 50) |      54,854 |     21 |    0.5256 |    0.4468 |  0.0789
+        (200, 100) |     119,704 |     20 |    0.5053 |    0.4348 |  0.0705
+     (100, 50, 25) |      56,029 |     21 |    0.5185 |    0.4449 |  0.0735
+
+  Mejor F1 val absoluto : 0.4720 ((100,))
+  Umbral de parsimonia  : 0.4673 (99% del mejor)
+  ELEGIDA               : (100,) con 50,004 parametros -> F1 val 0.4720
+  Razon: es la red con MENOS parametros dentro del 1% del mejor.
+
+  EXPERIMENTO 2: alpha (regularizacion L2) (VARIANTE A)
+  Arquitectura fija en (100,). El default de sklearn es alpha=0.0001.
+
+     alpha | epocas |  F1 train |    F1 val |  brecha
+  ----------------------------------------------------
+  0.0001 <-def |     26 |    0.5590 |    0.4720 |  0.0869
+     0.001 |     26 |    0.5591 |    0.4708 |  0.0883
+      0.01 |     26 |    0.5565 |    0.4719 |  0.0846
+       0.1 |     26 |    0.5446 |    0.4674 |  0.0771
+       1.0 |     29 |    0.5059 |    0.4751 |  0.0308
+
+  Mejor F1 val absoluto : 0.4751 (alpha=1.0)
+  Umbral de parsimonia  : 0.4704 (99% del mejor)
+  ELEGIDO               : alpha=1.0 -> F1 val 0.4751
+  Razon: a igual rendimiento se prefiere MAS regularizacion.
+
+  HIPERPARAMETROS FINALES (VARIANTE A):
+    hidden_layer_sizes = (100,)          (experimento 1)
+    alpha = 1.0                     (experimento 2)
+    activation = 'relu'                 (DEFAULT)
+    solver = 'adam'                     (DEFAULT)
+    learning_rate_init = 0.001   (DEFAULT)
+    beta_1=0.9, beta_2=0.999            (DEFAULT: momentos de Adam)
+    batch_size = 200                (DEFAULT 'auto' = min(200, n))
+    max_iter = 300             (DEFAULT 200; se sube para no
+                                         cortar antes que early stopping)
+    early_stopping = True               (DEFAULT False; se activa)
+    n_iter_no_change = 15      (DEFAULT 10)
+    validation_fraction = 0.1  (DEFAULT)
+    random_state = 42
+
+    --- TRAIN ---
+    Accuracy         : 0.7632
+    Precision (macro): 0.4722
+    Recall (macro)   : 0.5899
+    F1 (macro)       : 0.5059
+
+    --- VALIDACION ---
+    Accuracy         : 0.7576
+    Precision (macro): 0.4496
+    Recall (macro)   : 0.5429
+    F1 (macro)       : 0.4751
+
+  Epocas corridas: 29 (tope 300)
+  Perdida final  : 1.0736
+  OVERFITTING / UNDERFITTING: brecha F1 train-val = 0.0308
+    -> Sin senales fuertes de over/underfitting.
+
+  Reporte por clase (validacion):
+                  precision    recall  f1-score   support
+
+      ARMA_FUEGO       0.95      0.83      0.89      5236
+     ARMA_BLANCA       0.44      0.49      0.46       828
+ARMA_CONTUNDENTE       0.15      0.33      0.20       177
+           OTRAS       0.26      0.52      0.35       355
+
+        accuracy                           0.76      6596
+       macro avg       0.45      0.54      0.48      6596
+    weighted avg       0.83      0.76      0.79      6596
+
+                       pred_ARMA_FUEGO  pred_ARMA_BLANCA  pred_ARMA_CONTUNDENTE  pred_OTRAS
+real_ARMA_FUEGO                   4346               414                    159         317
+real_ARMA_BLANCA                   130               408                    124         166
+real_ARMA_CONTUNDENTE               26                49                     58          44
+real_OTRAS                          55                57                     58         185
+
+==============================================================================
+VARIANTE B (balanceo de clases: no)
+==============================================================================
+  train: (10409, 457)   val: (2230, 457)
+
+  Distribucion real en train:
+    ARMA_FUEGO          4,060  (39.00%)
+    ARMA_BLANCA         3,865  (37.13%)
+    ARMA_CONTUNDENTE      826  ( 7.94%)
+    OTRAS               1,658  (15.93%)
+
+  EXPERIMENTO 1: arquitectura (VARIANTE B)
+  El default de sklearn es (100,). No es un detalle: es la red entera.
+
+      arquitectura |  parametros | epocas |  F1 train |    F1 val |  brecha
+  ----------------------------------------------------------------------------
+             (50,) |      23,104 |     31 |    0.5784 |    0.5252 |  0.0532
+  (100,) <- default |      46,204 |     41 |    0.6861 |    0.5280 |  0.1581
+            (200,) |      92,404 |     25 |    0.5927 |    0.5161 |  0.0767
+         (100, 50) |      51,054 |     21 |    0.5233 |    0.4951 |  0.0282
+        (200, 100) |     112,104 |     22 |    0.6058 |    0.5180 |  0.0878
+     (100, 50, 25) |      52,229 |     28 |    0.6884 |    0.5166 |  0.1719
+
+  Mejor F1 val absoluto : 0.5280 ((100,))
+  Umbral de parsimonia  : 0.5227 (99% del mejor)
+  ELEGIDA               : (50,) con 23,104 parametros -> F1 val 0.5252
+  Razon: es la red con MENOS parametros dentro del 1% del mejor.
+
+  EXPERIMENTO 2: alpha (regularizacion L2) (VARIANTE B)
+  Arquitectura fija en (50,). El default de sklearn es alpha=0.0001.
+
+     alpha | epocas |  F1 train |    F1 val |  brecha
+  ----------------------------------------------------
+  0.0001 <-def |     31 |    0.5784 |    0.5252 |  0.0532
+     0.001 |     31 |    0.5768 |    0.5257 |  0.0511
+      0.01 |     31 |    0.5756 |    0.5279 |  0.0477
+       0.1 |     37 |    0.5651 |    0.5185 |  0.0465
+       1.0 |     62 |    0.5042 |    0.4962 |  0.0080
+
+  Mejor F1 val absoluto : 0.5279 (alpha=0.01)
+  Umbral de parsimonia  : 0.5226 (99% del mejor)
+  ELEGIDO               : alpha=0.01 -> F1 val 0.5279
+  Razon: a igual rendimiento se prefiere MAS regularizacion.
+
+  HIPERPARAMETROS FINALES (VARIANTE B):
+    hidden_layer_sizes = (50,)          (experimento 1)
+    alpha = 0.01                     (experimento 2)
+    activation = 'relu'                 (DEFAULT)
+    solver = 'adam'                     (DEFAULT)
+    learning_rate_init = 0.001   (DEFAULT)
+    beta_1=0.9, beta_2=0.999            (DEFAULT: momentos de Adam)
+    batch_size = 200                (DEFAULT 'auto' = min(200, n))
+    max_iter = 300             (DEFAULT 200; se sube para no
+                                         cortar antes que early stopping)
+    early_stopping = True               (DEFAULT False; se activa)
+    n_iter_no_change = 15      (DEFAULT 10)
+    validation_fraction = 0.1  (DEFAULT)
+    random_state = 42
+
+    --- TRAIN ---
+    Accuracy         : 0.7013
+    Precision (macro): 0.6629
+    Recall (macro)   : 0.5624
+    F1 (macro)       : 0.5756
+
+    --- VALIDACION ---
+    Accuracy         : 0.6780
+    Precision (macro): 0.5912
+    Recall (macro)   : 0.5256
+    F1 (macro)       : 0.5279
+
+  Epocas corridas: 31 (tope 300)
+  Perdida final  : 0.6981
+  OVERFITTING / UNDERFITTING: brecha F1 train-val = 0.0477
+    -> Sin senales fuertes de over/underfitting.
+
+  Reporte por clase (validacion):
+                  precision    recall  f1-score   support
+
+      ARMA_FUEGO       0.78      0.83      0.80       870
+     ARMA_BLANCA       0.62      0.74      0.68       828
+ARMA_CONTUNDENTE       0.39      0.07      0.12       177
+           OTRAS       0.57      0.46      0.51       355
+
+        accuracy                           0.68      2230
+       macro avg       0.59      0.53      0.53      2230
+    weighted avg       0.66      0.68      0.66      2230
+
+                       pred_ARMA_FUEGO  pred_ARMA_BLANCA  pred_ARMA_CONTUNDENTE  pred_OTRAS
+real_ARMA_FUEGO                    725               129                      1          15
+real_ARMA_BLANCA                   131               612                     11          74
+real_ARMA_CONTUNDENTE               21               109                     13          34
+real_OTRAS                          55               130                      8         162
+
+==============================================================================
+EXPERIMENTO 3: sklearn vs KERAS (misma configuracion)
+==============================================================================
+  Equivalencias explicitas:
+    hidden_layer_sizes  -> Dense(n, activation='relu')
+    (salida implicita)  -> Dense(4, activation='softmax')
+    alpha               -> kernel_regularizer=l2(alpha)
+    solver='adam'       -> optimizers.Adam(learning_rate=0.001)
+    batch_size=200      -> batch_size=200
+    n_iter_no_change=15 -> EarlyStopping(patience=15)
+    sample_weight       -> class_weight  (Keras SI lo tiene nativo)
+
+  Diferencias que NO se pueden igualar pasando el mismo numero:
+    - epsilon de Adam: 1e-8 en sklearn, 1e-7 en Keras.
+    - El orden de los batches y la inicializacion usan generadores
+      distintos, aunque ambos parten de Glorot uniform.
+    - LA PENALIZACION L2 NO SIGNIFICA LO MISMO:
+        sklearn: loss += 0.5 * alpha * SUM(W^2) / sw_sum
+                 y sw_sum ~ batch_size, porque _backprop recibe el
+                 BATCH, no el dataset entero.
+        Keras  : loss += alpha * SUM(W^2)   (no divide por nada)
+      Pasar el mismo numero regulariza 2*batch = 400x mas fuerte
+      en Keras. Por eso se corren DOS versiones: la ingenua (mismo
+      numero) y la corregida (a_keras = 0.5*alpha/batch).
+
+  keras 3.15.1
+
+  --- 3a. Keras INGENUO: se le pasa el mismo alpha que a sklearn ---
+
+  VARIANTE A - Keras ingenuo
+    Arquitectura: (100,) | batch=200 | Adam lr=0.001
+    l2 aplicado en Keras: 1.000e+00  (alpha de sklearn: 1.0)
+    Criterio de parada: val_loss + ultimo 10% (default Keras)
+    Parametros entrenables: 50,004
+    Epocas corridas: 119 (tope 300, paciencia 15)
+    class_weight nativo: si
+    F1 macro train: 0.4206
+    F1 macro val  : 0.4192
+    Brecha        : 0.0013
+
+  VARIANTE B - Keras ingenuo
+    Arquitectura: (50,) | batch=200 | Adam lr=0.001
+    l2 aplicado en Keras: 1.000e-02  (alpha de sklearn: 0.01)
+    Criterio de parada: val_loss + ultimo 10% (default Keras)
+    Parametros entrenables: 23,104
+    Epocas corridas: 68 (tope 300, paciencia 15)
+    class_weight nativo: no aplica
+    F1 macro train: 0.4794
+    F1 macro val  : 0.4710
+    Brecha        : 0.0084
+
+  VARIANTE A: sklearn 0.4751 vs Keras 0.4192  (-0.0559)
+  VARIANTE B: sklearn 0.5279 vs Keras 0.4710  (-0.0569)
+
+  --- 3b. Keras ALINEADO: se igualan las 3 diferencias controlables ---
+    (1) l2 reescalado: a_keras = 0.5 * alpha_sklearn / batch
+        El divisor es el BATCH, no n: _backprop de sklearn recibe el
+        batch, asi que su sw_sum vale ~200, no 30.782.
+    (2) criterio de parada: sklearn detiene por ACCURACY (_score),
+        no por perdida. Se pasa Keras a monitor='val_accuracy'.
+    (3) split interno: sklearn separa su 10% de forma ESTRATIFICADA;
+        el validation_split de Keras toma el ultimo 10% sin mirar
+        la clase. Se replica el split estratificado a mano.
+
+    VARIANTE A: alpha=1.0, batch=200 -> l2=2.500e-03  (factor 400x mas suave)
+    VARIANTE B: alpha=0.01, batch=200 -> l2=2.500e-05  (factor 400x mas suave)
+
+  VARIANTE A - Keras alineado
+    Arquitectura: (100,) | batch=200 | Adam lr=0.001
+    l2 aplicado en Keras: 2.500e-03  (alpha de sklearn: 1.0)
+    Criterio de parada: val_accuracy + split estratificado (como sklearn)
+    Parametros entrenables: 50,004
+    Epocas corridas: 23 (tope 300, paciencia 15)
+    class_weight nativo: si
+    F1 macro train: 0.4939
+    F1 macro val  : 0.4659
+    Brecha        : 0.0280
+
+  VARIANTE B - Keras alineado
+    Arquitectura: (50,) | batch=200 | Adam lr=0.001
+    l2 aplicado en Keras: 2.500e-05  (alpha de sklearn: 0.01)
+    Criterio de parada: val_accuracy + split estratificado (como sklearn)
+    Parametros entrenables: 23,104
+    Epocas corridas: 36 (tope 300, paciencia 15)
+    class_weight nativo: no aplica
+    F1 macro train: 0.5926
+    F1 macro val  : 0.5264
+    Brecha        : 0.0662
+
+  RESUMEN DEL EXPERIMENTO 3
+               |  sklearn |  Keras ingenuo |  Keras alineado
+  ------------------------------------------------------------
+    VARIANTE A |   0.4751 |         0.4192 |          0.4659
+    VARIANTE B |   0.5279 |         0.4710 |          0.5264
+
+  Diferencia media de F1 macro contra sklearn:
+    Keras ingenuo  : 0.0564
+    Keras alineado : 0.0054
+    Explicado por las 3 correcciones: 90%
+
+  COMO LEER ESTO (sin sobreafirmar):
+    La diferencia que queda es del orden del ruido de
+    inicializacion. Las dos librerias implementan el MISMO modelo:
+    lo que parecia una brecha de libreria era en realidad que los
+    hiperparametros NO SIGNIFICAN LO MISMO en cada una.
+
+==============================================================================
+IMPORTANCIA POR PERMUTACION
+==============================================================================
+
+  VARIANTE A - top 15 por importancia de permutacion:
+    lugar_CENTROS DE REHABILITACION SOCIAL             +0.02310
+    edad                                               +0.01932
+    presun_motiva_observada_RINAS                      +0.01923
+    presun_motiva_observada_AMENAZA                    +0.01106
+    presunta_motivacion_DELINCUENCIA COMUN             +0.01003
+    lugar_VIA PUBLICA                                  +0.00848
+    presun_motiva_observada_TRAFICO INTERNO DE DROGA   +0.00804
+    presunta_motivacion_VIOLENCIA INTRAFAMILIAR        +0.00464
+    provincia_LOS RIOS                                 +0.00454
+    presun_motiva_observada_SENTIMENTAL                +0.00379
+    lugar_FINCA                                        +0.00336
+    provincia_EL ORO                                   +0.00327
+    hora_23                                            +0.00292
+    tipo_lugar_PUBLICO                                 +0.00290
+    dia_semana_2                                       +0.00288
+
+  VARIANTE B - top 15 por importancia de permutacion:
+    lugar_CENTROS DE REHABILITACION SOCIAL             +0.04039
+    edad                                               +0.03769
+    lugar_VIA PUBLICA                                  +0.01657
+    presun_motiva_observada_RINAS                      +0.01574
+    estado_civil_SOLTERO                               +0.01246
+    tipo_lugar_PUBLICO                                 +0.01205
+    sexo_MUJER                                         +0.01064
+    presun_motiva_observada_LINCHAMIENTO               +0.00992
+    presunta_motivacion_DELINCUENCIA COMUN             +0.00882
+    presunta_motivacion_VIOLENCIA COMUNITARIA          +0.00815
+    presunta_motivacion_VIOLENCIA INTRAFAMILIAR        +0.00752
+    franja_horaria_MADRUGADA                           +0.00716
+    tipo_lugar_PRIVADO                                 +0.00716
+    presun_motiva_observada_TRAFICO INTERNO DE DROGA   +0.00698
+    provincia_BOLIVAR                                  +0.00672
+
+==============================================================================
+COMPARACION DIRECTA A vs B
+==============================================================================
+                 Variante A Variante B
+arquitectura         (100,)      (50,)
+alpha                   1.0       0.01
+Accuracy (val)      0.75758   0.678027
+F1 macro (val)     0.475105   0.527928
+Brecha train-val   0.030837   0.047689
+
+==============================================================================
+COMPARACION CONTRA EL MLP DE V1 (dataset.xlsx)
+==============================================================================
+  V1 (con filas fabricadas, (200,), alpha=0.01, 35 epocas):
+      Accuracy val 0.6376 | F1 macro val 0.6369 | brecha 0.140
+  V2 Variante A: Accuracy val 0.7576 | F1 macro val 0.4751 | brecha 0.0308
+  V2 Variante B: Accuracy val 0.6780 | F1 macro val 0.5279 | brecha 0.0477
+
+==============================================================================
+COMPARATIVA DE MODELOS V2 (validacion)
+==============================================================================
+                Accuracy (val)  F1 macro (val)  Brecha train-val
+MLP A                   0.7576          0.4751            0.0308
+MLP B                   0.6780          0.5279            0.0477
+RandomForest A          0.8170          0.5108            0.2717
+RandomForest B          0.6843          0.4927            0.1139
+Logistica A             0.7315          0.4468            0.0175
+Logistica B             0.6686          0.5037            0.0156
+
+  (CatBoost no aparece aca porque no usa los .npy: sus numeros estan
+   en informe_modelo_catboost_v2.txt -> A: 0.4838 | B: 0.5057)
+
+==============================================================================
+GRAFICOS
+==============================================================================
+  Graficos/mlp_v2_experimento_arquitectura.png
+  Graficos/mlp_v2_experimento_alpha.png
+  Graficos/mlp_v2_curvas_aprendizaje.png
+  Graficos/mlp_v2_matrices_confusion.png
+  Graficos/mlp_v2_importancia_permutacion.png
+  Graficos/mlp_v2_experimento_sklearn_vs_keras.png
+
+##############################################################################
+FIN
+##############################################################################
+Guardado: modelos/mlp_variante_{a,b}.joblib
+Guardado: modelos/mlp_keras_variante_{a,b}.keras

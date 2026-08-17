@@ -1,0 +1,48 @@
+
+##############################################################################
+EXPERIMENTO: GRANULARIDAD GEOGRAFICA
+##############################################################################
+Python 3.13.3 | semilla 42
+Random Forest con hiperparametros FIJOS (n_estimators=300,
+max_depth=25, min_samples_leaf=2). Lo unico que cambia es que
+columnas geograficas entran.
+
+==============================================================================
+VARIANTE A (class_weight=balanced)
+==============================================================================
+  train=30,782  val=6,596
+
+         nivel | columnas |  F1 macro | F1 CONTUND. |  F1 OTRAS | F1 BLANCA |  F1 FUEGO
+  --------------------------------------------------------------------------------------------
+      completo |      495 |    0.5108 |      0.1524 |    0.4453 |    0.5282 |    0.9172
+    sin_canton |      282 |    0.5102 |      0.1569 |    0.4351 |    0.5292 |    0.9197
+     solo_prov |      273 |    0.5155 |      0.1574 |    0.4474 |    0.5381 |    0.9192
+     solo_zona |      258 |    0.5085 |      0.1554 |    0.4251 |    0.5349 |    0.9185
+
+  Mejor F1 macro           : solo_prov (0.5155)
+  Mejor F1 ARMA_CONTUNDENTE: solo_prov (0.1574)
+
+==============================================================================
+VARIANTE B (class_weight=None)
+==============================================================================
+  train=10,409  val=2,230
+
+         nivel | columnas |  F1 macro | F1 CONTUND. |  F1 OTRAS | F1 BLANCA |  F1 FUEGO
+  --------------------------------------------------------------------------------------------
+      completo |      457 |    0.4927 |      0.0331 |    0.4418 |    0.6933 |    0.8025
+    sin_canton |      250 |    0.4980 |      0.0324 |    0.4595 |    0.6941 |    0.8058
+     solo_prov |      241 |    0.4925 |      0.0328 |    0.4423 |    0.6861 |    0.8086
+     solo_zona |      226 |    0.4888 |      0.0324 |    0.4338 |    0.6858 |    0.8032
+
+  Mejor F1 macro           : sin_canton (0.4980)
+  Mejor F1 ARMA_CONTUNDENTE: completo (0.0331)
+
+==============================================================================
+CONCLUSION
+==============================================================================
+  Variante A: bajar de 'completo' a 'solo_prov' cambia el F1
+              de ARMA_CONTUNDENTE en +0.0049 (0.1524 -> 0.1574)
+  Variante B: bajar de 'completo' a 'completo' cambia el F1
+              de ARMA_CONTUNDENTE en +0.0000 (0.0331 -> 0.0331)
+
+Grafico: Graficos/experimento_geografia.png
