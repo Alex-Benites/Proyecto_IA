@@ -67,6 +67,14 @@ MODELOS = {
         "titulo": "Random Forest",
         "dinamica": "arboles",
     },
+    "mlp": {
+        "archivo": "modelo4_mlp.joblib",
+        "prefijo": "modelo4_mlp",
+        "titulo": "Red Neuronal (MLP)",
+        # La curva de perdida por epoca la genera 09_modelo_mlp.py, que tiene
+        # acceso a loss_curve_ del entrenamiento. Aqui no se regenera.
+        "dinamica": None,
+    },
 }
 
 # Paleta categorica en orden fijo: un color por clase, siempre el mismo.
@@ -425,6 +433,42 @@ def fig_importancia_arboles(modelo, nombres_features):
     guardar(fig, "fig6_importancia.png")
 
 
+def fig_importancia_permutacion(modelo, nombres_features, X_val, y_val):
+    """Para modelos sin coeficientes ni feature_importances_ (ej. el MLP).
+
+    Importancia por PERMUTACION: se baraja al azar UNA columna y se mide
+    cuanto empeora el F1. Si empeora mucho, esa columna importaba.
+    Es agnostica al modelo y facil de explicar: no depende de la estructura
+    interna, solo de cuanto se degrada la prediccion sin esa variable.
+    """
+    from sklearn.inspection import permutation_importance
+    print("  calculando importancia por permutacion (puede tardar)...")
+    r = permutation_importance(
+        modelo, X_val, y_val, n_repeats=5, random_state=SEMILLA,
+        scoring="f1_macro", n_jobs=-1)
+
+    top_idx = np.argsort(r.importances_mean)[-20:]
+    vals = r.importances_mean[top_idx]
+    errs = r.importances_std[top_idx]
+    etiquetas = [_limpiar_nombre(nombres_features[i]) for i in top_idx]
+
+    fig, ax = plt.subplots(figsize=(10, 8))
+    barras = ax.barh(range(len(vals)), vals, xerr=errs, color="#2a78d6",
+                     zorder=3, height=0.7,
+                     error_kw={"ecolor": "#898781", "elinewidth": 1.2})
+    for b in barras:
+        b.set_edgecolor(SUPERFICIE)
+        b.set_linewidth(1.5)
+    ax.set_yticks(range(len(vals)))
+    ax.set_yticklabels(etiquetas, fontsize=9)
+    estilo(ax, "Las 20 variables mas importantes (por permutacion)\n"
+               "Cuanto cae el F1 al barajar esa columna al azar.",
+           xlabel="Caida de F1 macro al permutar")
+    ax.grid(axis="x", color=GRID, linewidth=0.8)
+    ax.grid(axis="y", visible=False)
+    guardar(fig, "fig6_importancia.png")
+
+
 def _limpiar_nombre(nombre):
     return (nombre.replace("cat__", "").replace("num__", "")
                   .replace("bin__", "")[:44])
@@ -460,15 +504,19 @@ def main():
 
     if cfg["dinamica"] == "iteraciones":
         fig_dinamica_iteraciones(X_train, y_train, X_val, y_val)
-    else:
+    elif cfg["dinamica"] == "arboles":
         fig_dinamica_arboles(X_train, y_train, X_val, y_val, modelo)
+    else:
+        print("  (la curva de aprendizaje por epoca la genera su propio script)")
 
     fig_curva_aprendizaje(X_train, y_train, X_val, y_val, modelo)
 
     if hasattr(modelo, "coef_"):
         fig_importancia_coeficientes(modelo, nombres_features)
-    else:
+    elif hasattr(modelo, "feature_importances_"):
         fig_importancia_arboles(modelo, nombres_features)
+    else:
+        fig_importancia_permutacion(modelo, nombres_features, X_val, y_val)
 
     print(f"\nTodas las figuras en: Graficos/")
 
