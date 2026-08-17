@@ -1,0 +1,232 @@
+
+##############################################################################
+ETAPA 4 - MODELO 4: XGBOOST MULTICLASE
+##############################################################################
+Python 3.13.7 | scikit-learn 1.9.0 | xgboost 3.4.1 | semilla 42
+
+==============================================================================
+CARGA DE DATOS
+==============================================================================
+  Train: X=(14630, 475) | y=(14630,)
+  Val  : X=(3135, 475) | y=(3135,)
+
+  Mapeo de clases usado por XGBoost:
+    0 -> ARMA_FUEGO
+    1 -> ARMA_BLANCA
+    2 -> ARMA_CONTUNDENTE
+    3 -> OTRAS
+
+  Distribucion TRAIN:
+    ARMA_FUEGO        :   3592 (24.55%)
+    ARMA_BLANCA       :   3864 (26.41%)
+    ARMA_CONTUNDENTE  :   3626 (24.78%)
+    OTRAS             :   3548 (24.25%)
+
+  NOTA: test_X.npy y test_y.npy NO se cargan.
+  El conjunto TEST permanece sellado para la evaluacion final.
+
+##############################################################################
+ESCENARIO A - XGBOOST BASE
+##############################################################################
+Se conservan los hiperparametros del booster en sus valores base.
+Solo se define explicitamente la tarea multiclase y la semilla.
+
+==============================================================================
+PARAMETROS EFECTIVOS - XGBOOST BASE
+==============================================================================
+  booster              = None
+  n_estimators         = None
+  learning_rate        = None
+  max_depth            = None
+  min_child_weight     = None
+  gamma                = None
+  subsample            = None
+  colsample_bytree     = None
+  reg_alpha            = None
+  reg_lambda           = None
+  objective            = multi:softprob
+  tree_method          = None
+
+==============================================================================
+RESULTADOS - XGBoost Default
+==============================================================================
+
+  --- TRAIN ---
+  Accuracy         : 0.7463
+  Precision (macro): 0.7458
+  Recall (macro)   : 0.7458
+  F1 (macro)       : 0.7458
+  Log Loss         : 0.6759
+
+  --- VALIDACION ---
+  Accuracy         : 0.6274
+  Precision (macro): 0.6265
+  Recall (macro)   : 0.6263
+  F1 (macro)       : 0.6260
+  Log Loss         : 0.8820
+
+  Chequeo train vs validacion:
+  F1 train         : 0.7458
+  F1 validacion    : 0.6260
+  Diferencia       : 0.1198
+  Tiempo entrenamiento: 2.76 segundos
+  -> Posible OVERFITTING.
+
+  Reporte por clase - VALIDACION:
+                  precision    recall  f1-score   support
+
+      ARMA_FUEGO       0.64      0.59      0.62       769
+     ARMA_BLANCA       0.64      0.67      0.66       828
+ARMA_CONTUNDENTE       0.65      0.68      0.67       777
+           OTRAS       0.57      0.56      0.56       761
+
+        accuracy                           0.63      3135
+       macro avg       0.63      0.63      0.63      3135
+    weighted avg       0.63      0.63      0.63      3135
+
+
+##############################################################################
+ESCENARIO B - XGBOOST AJUSTE MANUAL
+##############################################################################
+Configuracion mas conservadora para reducir sobreajuste y permitir
+que varios arboles pequenos aprendan progresivamente.
+
+==============================================================================
+PARAMETROS - XGBOOST AJUSTE MANUAL
+==============================================================================
+  booster              = None
+  n_estimators         = 400
+  learning_rate        = 0.05
+  max_depth            = 4
+  min_child_weight     = 3
+  gamma                = 0.1
+  subsample            = 0.8
+  colsample_bytree     = 0.8
+  reg_alpha            = 0.1
+  reg_lambda           = 2.0
+  objective            = multi:softprob
+  tree_method          = hist
+
+==============================================================================
+RESULTADOS - XGBoost Manual
+==============================================================================
+
+  --- TRAIN ---
+  Accuracy         : 0.6596
+  Precision (macro): 0.6590
+  Recall (macro)   : 0.6589
+  F1 (macro)       : 0.6586
+  Log Loss         : 0.8291
+
+  --- VALIDACION ---
+  Accuracy         : 0.6198
+  Precision (macro): 0.6189
+  Recall (macro)   : 0.6185
+  F1 (macro)       : 0.6177
+  Log Loss         : 0.9020
+
+  Chequeo train vs validacion:
+  F1 train         : 0.6586
+  F1 validacion    : 0.6177
+  Diferencia       : 0.0408
+  Tiempo entrenamiento: 8.38 segundos
+  -> Sin una senal fuerte de over/underfitting.
+
+  Reporte por clase - VALIDACION:
+                  precision    recall  f1-score   support
+
+      ARMA_FUEGO       0.64      0.57      0.60       769
+     ARMA_BLANCA       0.64      0.67      0.65       828
+ARMA_CONTUNDENTE       0.64      0.69      0.67       777
+           OTRAS       0.56      0.55      0.55       761
+
+        accuracy                           0.62      3135
+       macro avg       0.62      0.62      0.62      3135
+    weighted avg       0.62      0.62      0.62      3135
+
+
+##############################################################################
+ESCENARIO C - XGBOOST RANDOMIZED SEARCH
+##############################################################################
+La busqueda usa SOLO TRAIN y validacion cruzada estratificada.
+Combinaciones aleatorias: 25 | folds: 5 | ajustes aproximados: 125
+Metrica de seleccion: F1 macro.
+
+==============================================================================
+MEJOR CONFIGURACION ENCONTRADA POR RANDOMIZED SEARCH
+==============================================================================
+  Mejor F1 macro promedio en CV: 0.6309
+  Mejor indice                  : 5
+  colsample_bytree     = 0.7
+  gamma                = 0.05
+  learning_rate        = 0.05
+  max_depth            = 8
+  min_child_weight     = 1
+  n_estimators         = 350
+  reg_alpha            = 0.5
+  reg_lambda           = 2.0
+  subsample            = 0.7
+
+==============================================================================
+RESULTADOS - XGBoost RandomizedSearch
+==============================================================================
+
+  --- TRAIN ---
+  Accuracy         : 0.7861
+  Precision (macro): 0.7860
+  Recall (macro)   : 0.7856
+  F1 (macro)       : 0.7857
+  Log Loss         : 0.6235
+
+  --- VALIDACION ---
+  Accuracy         : 0.6262
+  Precision (macro): 0.6262
+  Recall (macro)   : 0.6251
+  F1 (macro)       : 0.6250
+  Log Loss         : 0.8669
+
+  Chequeo train vs validacion:
+  F1 train         : 0.7857
+  F1 validacion    : 0.6250
+  Diferencia       : 0.1607
+  Tiempo entrenamiento: 732.87 segundos
+  -> Posible OVERFITTING.
+
+  Reporte por clase - VALIDACION:
+                  precision    recall  f1-score   support
+
+      ARMA_FUEGO       0.65      0.58      0.61       769
+     ARMA_BLANCA       0.64      0.67      0.65       828
+ARMA_CONTUNDENTE       0.66      0.68      0.67       777
+           OTRAS       0.56      0.57      0.57       761
+
+        accuracy                           0.63      3135
+       macro avg       0.63      0.63      0.62      3135
+    weighted avg       0.63      0.63      0.63      3135
+
+
+##############################################################################
+COMPARACION FINAL DE LOS 3 ESCENARIOS
+##############################################################################
+                  modelo  accuracy_train  f1_train  accuracy_val  precision_macro_val  recall_macro_val  f1_macro_val  log_loss_val  gap_f1_train_val  tiempo_segundos
+         XGBoost Default          0.7463    0.7458        0.6274               0.6265            0.6263        0.6260        0.8820            0.1198           2.7641
+XGBoost RandomizedSearch          0.7861    0.7857        0.6262               0.6262            0.6251        0.6250        0.8669            0.1607         732.8698
+          XGBoost Manual          0.6596    0.6586        0.6198               0.6189            0.6185        0.6177        0.9020            0.0408           8.3772
+
+GANADOR EN VALIDACION: XGBoost Default
+F1 macro validacion : 0.6260
+Guardado             : modelos\modelo4_xgboost_mejor.joblib
+
+IMPORTANTE:
+  El conjunto TEST NO fue utilizado para escoger este ganador.
+  La evaluacion sobre TEST debe hacerse en la etapa final, despues
+  de comparar tambien Regresion Logistica, Arbol, Random Forest y MLP.
+
+##############################################################################
+FIN MODELO 4 - XGBOOST
+##############################################################################
+Guardado: modelos\modelo4_xgb_default.joblib
+Guardado: modelos\modelo4_xgb_manual.joblib
+Guardado: modelos\modelo4_xgb_search.joblib
+Guardado: modelos\modelo4_xgboost_mejor.joblib
+Guardado: resultados\modelos\comparacion_xgboost.csv

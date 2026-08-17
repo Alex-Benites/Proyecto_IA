@@ -2,7 +2,7 @@
 ##############################################################################
 ETAPA 3 - PREPARACION
 ##############################################################################
-Python 3.13.3 | pandas 2.3.1 | numpy 2.3.2 | scikit-learn 1.8.0 | semilla 42
+Python 3.13.7 | pandas 2.3.3 | numpy 2.3.5 | scikit-learn 1.9.0 | semilla 42
 
 Entrada: data/processed/dataset.xlsx -> 20,901 filas x 27 columnas
 ADVERTENCIA (documentada, decision del usuario): este dataset contiene
