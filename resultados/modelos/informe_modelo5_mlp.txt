@@ -1,0 +1,284 @@
+
+##############################################################################
+MODELO 5: MLP (RED NEURONAL MULTICAPA)
+##############################################################################
+Python 3.12.13 | scikit-learn 1.8.0 | semilla 42
+
+==============================================================================
+DATOS: solo filas REALES, train submuestreado balanceado
+==============================================================================
+  Split original (mezcla real+fabricado, igual que 03_preparacion.py):
+    train: 14,630 filas | val: 3,135 filas
+  Filas verificadas como REALES (cruzadas contra A_2014_2025_limpio.csv +
+  B_2026_limpio.csv):
+    train-real: 9,378 (64.1%)
+    val-real  : 2,046 (65.3%)
+  Balance de clases en train-real (antes de submuestrear):
+    ARMA_BLANCA        3,864
+    ARMA_FUEGO         3,592
+    OTRAS              1,110
+    ARMA_CONTUNDENTE   812
+  Clase minoritaria: 812 filas -> se submuestrean TODAS las
+  clases a 812 (sin fabricar nada, solo usando menos filas reales
+  de las clases que sobran). Train final: 3,248 filas.
+  Val se deja con su desbalance real (no se toca): asi la evaluacion refleja
+  la distribucion real de clases, no una artificial.
+  NOTA: que filas de FUEGO/BLANCA sobreviven al recorte depende de la semilla
+  de submuestreo. Se usa semilla=42 para el modelo que se guarda, pero
+  el EXPERIMENTO 4 mas abajo mide cuanto varia el resultado entre semillas.
+
+  Train (codificado): (3248, 386)  |  Val (codificado): (2046, 386)
+  Columnas categoricas usadas (15, sin 'mes' ni 'hora'): ['zona', 'provincia', 'canton', 'area_hecho', 'lugar', 'tipo_lugar', 'presunta_motivacion', 'presun_motiva_observada', 'sexo', 'etnia', 'estado_civil', 'nacionalidad', 'discapacidad', 'dia_semana', 'franja_horaria']
+
+==============================================================================
+BATCH SIZE (concepto de mini-batch, explicito)
+==============================================================================
+  batch_size = 64 filas por lote (fijo, NO se deja el 'auto' de
+  sklearn). Con un train mucho mas chico que el original (submuestreado),
+  128 daria muy pocos lotes por epoca; 64 da un numero mas razonable.
+  3,248 filas de train / 64 = 51 lotes por epoca.
+  Cada lote produce UNA actualizacion de pesos (Adam). Una epoca =
+  pasar por los 51 lotes una vez.
+
+==============================================================================
+EXPERIMENTO 1: ¿que arquitectura usar? (barrido manual)
+==============================================================================
+  Se prueba cada hidden_layer_sizes con los demas hiperparametros
+  fijos (activation=relu, solver=adam, batch_size=64, alpha=0.0001,
+  max_iter=300) y se mide F1 en train y en validacion.
+  NO se usa GridSearchCV: el barrido es explicito y esta documentado.
+
+    arquitectura | parametros | iter usadas |  F1 train |    F1 val |  brecha
+  ------------------------------------------------------------------------------
+              16 |      6,260 |         300 |    0.8234 |    0.4539 |  0.3695
+              32 |     12,516 |         300 |    0.9335 |    0.4396 |  0.4938
+              64 |     25,028 |         300 |    0.9757 |    0.4480 |  0.5277
+           64x32 |     26,980 |         141 |    0.9800 |    0.4511 |  0.5289
+             128 |     50,052 |         287 |    0.9865 |    0.4354 |  0.5511
+          128x64 |     58,052 |         132 |    0.9855 |    0.4245 |  0.5610
+
+  Mejor F1 absoluto : 0.4539 (arquitectura=16)
+  Umbral del 1%     : 0.4493
+  ELEGIDA (menos parametros dentro del umbral): 16 (6,260 parametros) -> F1 val 0.4539
+  Grafico: Graficos/modelo5_mlp_fig0_arquitectura.png
+
+==============================================================================
+EXPERIMENTO 2: ¿cuantas epocas entrenar? (curva train/val)
+==============================================================================
+  Arquitectura fija: (16,). Se entrena epoca a epoca (warm_start,
+  1 epoca por paso) y se mide F1 en train y val en CADA epoca.
+  Esto reemplaza al early_stopping automatico de sklearn (que
+  separaria su propia validacion interna): aqui se decide contra
+  el set de validacion REAL del proyecto, de forma explicita.
+
+  Mejor F1 val en la curva : 0.4977 (epoca 17)
+  Umbral del 1%            : 0.4927
+  ELEGIDA (epoca mas temprana dentro del umbral): epoca 13 -> F1 val 0.4944, brecha 0.0943
+  Grafico: Graficos/modelo5_mlp_fig4_dinamica_epocas.png
+
+==============================================================================
+MODELO FINAL (hiperparametros explicitos)
+==============================================================================
+  hidden_layer_sizes = (16,)
+  activation = relu
+  solver = adam
+  batch_size = 64
+  alpha = 0.0001
+  max_iter = 13
+  random_state = 42
+
+  Justificacion de cada uno:
+    hidden_layer_sizes : fijada por el experimento 1 (parsimonia).
+    activation=relu    : estandar, no satura el gradiente como tanh/sigmoid.
+    solver=adam        : descenso de gradiente por mini-batches, con momento
+                         adaptativo.
+    batch_size=64      : tamanio de mini-batch, fijado y justificado arriba.
+    alpha              : regularizacion L2 sobre los pesos (evita que crezcan
+                         sin control). Valor por defecto de sklearn.
+    max_iter=epocas    : fijado por el experimento 2, NO por early_stopping
+                         automatico de sklearn.
+    class_weight       : no existe en MLPClassifier. El balance se logra
+                         submuestreando train (ver arriba), no con este parametro.
+
+  Uso las 13 epocas completas (el limite fijado).
+
+==============================================================================
+METRICAS
+==============================================================================
+
+  --- TRAIN ---
+  Accuracy         : 0.6127
+  Precision (macro): 0.6062
+  Recall (macro)   : 0.6127
+  F1 (macro)       : 0.6039
+
+  --- VALIDACION ---
+  Accuracy         : 0.5948
+  Precision (macro): 0.5027
+  Recall (macro)   : 0.5210
+  F1 (macro)       : 0.4969
+
+==============================================================================
+CHEQUEO DE OVERFITTING / UNDERFITTING (alpha por defecto)
+==============================================================================
+  F1 macro train : 0.6039
+  F1 macro val   : 0.4969
+  Diferencia     : 0.1070
+  -> OVERFITTING (brecha > 0.08): memoriza train, no
+     generaliza igual a val. Se corre el experimento 3 (alpha) abajo.
+
+==============================================================================
+EXPERIMENTO 3: ¿que alpha usar? (barrido manual, por overfitting)
+==============================================================================
+  El modelo con alpha=0.0001 (por defecto) supero el umbral de
+  overfitting (0.08), asi que se barre alpha con la
+  arquitectura ((16,)) y las epocas (13) ya elegidas, fijas.
+
+     alpha |  F1 train |    F1 val |  brecha
+  ------------------------------------------
+     1e-05 |    0.6031 |    0.4965 |  0.1065
+    0.0001 |    0.6039 |    0.4969 |  0.1070
+     0.001 |    0.6038 |    0.4997 |  0.1041
+      0.01 |    0.6021 |    0.4952 |  0.1069
+       0.1 |    0.5907 |    0.4987 |  0.0920
+       0.3 |    0.5760 |    0.4898 |  0.0861
+
+  Mejor F1 val   : 0.4997 (alpha=0.001)
+  Umbral del 1%  : 0.4947
+  ELEGIDO (mas regularizado dentro del umbral): alpha=0.1 -> F1 val 0.4987, brecha 0.0920
+  Grafico: Graficos/modelo5_mlp_fig5_alpha.png
+
+==============================================================================
+MODELO FINAL, REENTRENADO CON alpha AJUSTADO
+==============================================================================
+  alpha: 0.0001 (por defecto) -> 0.1 (experimento 3)
+
+==============================================================================
+METRICAS (con alpha ajustado)
+==============================================================================
+
+  --- TRAIN ---
+  Accuracy         : 0.6010
+  Precision (macro): 0.5937
+  Recall (macro)   : 0.6010
+  F1 (macro)       : 0.5907
+
+  --- VALIDACION ---
+  Accuracy         : 0.5992
+  Precision (macro): 0.5025
+  Recall (macro)   : 0.5211
+  F1 (macro)       : 0.4987
+
+==============================================================================
+CHEQUEO DE OVERFITTING / UNDERFITTING (alpha ajustado)
+==============================================================================
+  F1 macro train : 0.5907
+  F1 macro val   : 0.4987
+  Diferencia     : 0.0920
+  -> Sigue habiendo overfitting, pero es lo mejor que se logra
+     dentro del umbral del 1% de F1 val (ver experimento 3).
+
+==============================================================================
+EXPERIMENTO 4: robustez del submuestreo (varias semillas)
+==============================================================================
+  Se repite el submuestreo+entrenamiento con 10 semillas
+  distintas (mismos hiperparametros ya elegidos: arquitectura, alpha,
+  epocas). El val NO cambia entre corridas, solo que filas de train
+  sobreviven al submuestreo. Esto mide cuanto varia el resultado por
+  el azar de cual submuestra toco, no reemplaza el modelo final.
+
+   semilla |    F1 val | Precision |    Recall
+  --------------------------------------------
+         0 |    0.4917 |    0.5121 |    0.5363
+         1 |    0.4853 |    0.4917 |    0.5127
+         2 |    0.4980 |    0.5043 |    0.5249
+         3 |    0.5051 |    0.5099 |    0.5326
+         4 |    0.5101 |    0.5155 |    0.5398
+         5 |    0.4935 |    0.5050 |    0.5316
+         6 |    0.4978 |    0.5077 |    0.5306
+         7 |    0.4943 |    0.5067 |    0.5301
+         8 |    0.4872 |    0.4993 |    0.5219
+         9 |    0.5010 |    0.5091 |    0.5326
+
+  F1 macro   : media=0.4964  desvio=0.0073  min=0.4853  max=0.5101
+  Precision  : media=0.5061  desvio=0.0064
+  Recall     : media=0.5293  desvio=0.0073
+
+  NUMERO A REPORTAR (mas defendible que una sola corrida): F1 macro = 0.4964 +/- 0.0073
+  Grafico: Graficos/modelo5_mlp_fig7_robustez.png
+
+==============================================================================
+REPORTE POR CLASE (VALIDACION, solo filas reales)
+==============================================================================
+                  precision    recall  f1-score   support
+
+      ARMA_FUEGO       0.77      0.88      0.82       769
+     ARMA_BLANCA       0.71      0.45      0.55       828
+ARMA_CONTUNDENTE       0.19      0.28      0.23       190
+           OTRAS       0.34      0.47      0.39       259
+
+        accuracy                           0.60      2046
+       macro avg       0.50      0.52      0.50      2046
+    weighted avg       0.64      0.60      0.60      2046
+
+
+==============================================================================
+MATRIZ DE CONFUSION (VALIDACION, solo filas reales)
+==============================================================================
+                       pred_ARMA_FUEGO  pred_ARMA_BLANCA  pred_ARMA_CONTUNDENTE  pred_OTRAS
+real_ARMA_FUEGO                    675                42                     16          36
+real_ARMA_BLANCA                   138               375                    150         165
+real_ARMA_CONTUNDENTE               30                64                     53          43
+real_OTRAS                          30                46                     60         123
+  Grafico: Graficos/modelo5_mlp_fig1_matriz_confusion.png
+
+==============================================================================
+IMPORTANCIA DE VARIABLES (permutation_importance, val)
+==============================================================================
+  El MLP no expone coef_ ni feature_importances_. Se mide cuanto
+  EMPEORA el F1 macro al mezclar (permutar) al azar los valores de
+  una columna, manteniendo el resto igual: si el F1 cae mucho, esa
+  columna era importante para la prediccion. Se hace sobre VAL, no
+  train, para medir importancia real (no memorizacion).
+  Se agrupan las columnas one-hot por variable ORIGINAL (si no, la
+  importancia de 'provincia' quedaria dispersa en 24 columnas).
+
+presun_motiva_observada    0.0353
+lugar                      0.0322
+sexo                       0.0096
+presunta_motivacion        0.0089
+edad                       0.0085
+tipo_lugar                 0.0041
+dia_semana                 0.0035
+area_hecho                 0.0007
+nacionalidad              -0.0002
+estado_civil              -0.0006
+es_fin_semana             -0.0011
+etnia                     -0.0032
+franja_horaria            -0.0039
+discapacidad              -0.0041
+canton                    -0.0073
+zona                      -0.0122
+provincia                 -0.0141
+  Grafico: Graficos/modelo5_mlp_fig6_importancia.png
+
+==============================================================================
+COMPARATIVA CONTRA LOS MODELOS ANTERIORES (validacion)
+==============================================================================
+  (logistica/RF/CatBoost siguen usando 'mes'/'hora' Y filas fabricadas ->
+  no es una comparacion 100% pareja hasta que el equipo confirme los
+  mismos cambios para los 4 modelos. Se deja como referencia.)
+  MLP: se usa el F1 ROBUSTO del experimento 4 (0.4964 +/- 0.0073), no el de una sola corrida, para la comparativa.
+                MLP (real, submuestreado)  Regresion Logistica  Random Forest  CatBoost
+Accuracy (val)                     0.5992               0.5936         0.6316    0.6376
+F1 macro (val)                     0.4964               0.5920         0.6301    0.6370
+
+##############################################################################
+FIN MODELO 5
+##############################################################################
+RESULTADO A REPORTAR: F1 macro = 0.4964 +/- 0.0073
+(promedio de 10 semillas de submuestreo, experimento 4 -
+ mas defendible que el numero de una sola corrida, 0.4987)
+Guardado: modelos/modelo5_mlp.joblib (instancia con semilla=42)
+Guardado: modelos/preprocesador_mlp.joblib (propio: sin mes/hora, ajustado
+          SOLO con filas reales submuestreadas balanceadas)
