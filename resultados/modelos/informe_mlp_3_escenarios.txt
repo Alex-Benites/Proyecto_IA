@@ -1,0 +1,246 @@
+
+##############################################################################
+MODELO MLP - TRES ESCENARIOS
+##############################################################################
+Python 3.13.7 | scikit-learn 1.9.0 | semilla 42
+
+==============================================================================
+CARGA DE DATOS
+==============================================================================
+Train: X=(14630, 475) | y=(14630,)
+Val  : X=(3135, 475) | y=(3135,)
+Fuente: train_X.npy / val_X.npy
+Los datos ya vienen One-Hot encoded y escalados desde Etapa 3.
+No se vuelve a ajustar ningun preprocesamiento.
+TEST NO SE CARGA.
+
+Distribucion TRAIN:
+  ARMA_FUEGO        :   3592 (24.55%)
+  ARMA_BLANCA       :   3864 (26.41%)
+  ARMA_CONTUNDENTE  :   3626 (24.78%)
+  OTRAS             :   3548 (24.25%)
+
+##############################################################################
+ESCENARIO 1 - MLP DEFAULT
+##############################################################################
+Se mantienen los hiperparametros por defecto de MLPClassifier.
+Solo se fija random_state=42 y verbose=True para reproducibilidad y progreso visible.
+
+==============================================================================
+PARAMETROS EFECTIVOS - MLP DEFAULT
+==============================================================================
+  hidden_layer_sizes     = (100,)
+  activation             = relu
+  solver                 = adam
+  alpha                  = 0.0001
+  batch_size             = auto
+  learning_rate          = constant
+  learning_rate_init     = 0.001
+  max_iter               = 200
+  shuffle                = True
+  tol                    = 0.0001
+  early_stopping         = False
+  validation_fraction    = 0.1
+  n_iter_no_change       = 10
+  random_state           = 42
+
+Iniciando entrenamiento: MLP Default
+
+ADVERTENCIA DE CONVERGENCIA:
+  Stochastic Optimizer: Maximum iterations (200) reached and the optimization hasn't converged yet.
+
+==============================================================================
+RESULTADOS - MLP Default
+==============================================================================
+
+  --- TRAIN ---
+  Accuracy         : 0.9621
+  Precision (macro): 0.9624
+  Recall (macro)   : 0.9619
+  F1 (macro)       : 0.9620
+  Log Loss         : 0.1372
+
+  --- VALIDACION ---
+  Accuracy         : 0.5990
+  Precision (macro): 0.5985
+  Recall (macro)   : 0.5988
+  F1 (macro)       : 0.5985
+  Log Loss         : 1.9144
+
+  Chequeo train vs validacion:
+  F1 train         : 0.9620
+  F1 validacion    : 0.5985
+  Diferencia       : 0.3635
+  Epocas ejecutadas: 200
+  Tiempo           : 30.37 segundos
+  -> Posible OVERFITTING.
+
+  Reporte por clase - VALIDACION:
+                  precision    recall  f1-score   support
+
+      ARMA_FUEGO       0.61      0.64      0.62       769
+     ARMA_BLANCA       0.61      0.60      0.61       828
+ARMA_CONTUNDENTE       0.62      0.61      0.61       777
+           OTRAS       0.55      0.54      0.55       761
+
+        accuracy                           0.60      3135
+       macro avg       0.60      0.60      0.60      3135
+    weighted avg       0.60      0.60      0.60      3135
+
+
+##############################################################################
+ESCENARIO 2 - MLP AJUSTE MANUAL
+##############################################################################
+Dos capas ocultas + ReLU + Adam + regularizacion L2 + early stopping interno.
+El early stopping usa 15% de TRAIN; VAL externo no interviene.
+
+==============================================================================
+PARAMETROS - MLP AJUSTE MANUAL
+==============================================================================
+  hidden_layer_sizes     = (128, 64)
+  activation             = relu
+  solver                 = adam
+  alpha                  = 0.001
+  batch_size             = 128
+  learning_rate          = constant
+  learning_rate_init     = 0.0005
+  max_iter               = 500
+  shuffle                = True
+  tol                    = 0.0001
+  early_stopping         = True
+  validation_fraction    = 0.15
+  n_iter_no_change       = 20
+  random_state           = 42
+
+Iniciando entrenamiento: MLP Manual
+
+No se detectaron advertencias de convergencia.
+
+==============================================================================
+RESULTADOS - MLP Manual
+==============================================================================
+
+  --- TRAIN ---
+  Accuracy         : 0.7290
+  Precision (macro): 0.7315
+  Recall (macro)   : 0.7287
+  F1 (macro)       : 0.7285
+  Log Loss         : 0.6896
+
+  --- VALIDACION ---
+  Accuracy         : 0.6096
+  Precision (macro): 0.6122
+  Recall (macro)   : 0.6090
+  F1 (macro)       : 0.6092
+  Log Loss         : 0.9212
+
+  Chequeo train vs validacion:
+  F1 train         : 0.7285
+  F1 validacion    : 0.6092
+  Diferencia       : 0.1193
+  Epocas ejecutadas: 35
+  Tiempo           : 9.15 segundos
+  -> Posible OVERFITTING.
+  Mejor accuracy de validacion INTERNA: 0.6355
+  Esa validacion interna sale SOLO de TRAIN.
+
+  Reporte por clase - VALIDACION:
+                  precision    recall  f1-score   support
+
+      ARMA_FUEGO       0.64      0.54      0.59       769
+     ARMA_BLANCA       0.62      0.63      0.62       828
+ARMA_CONTUNDENTE       0.65      0.66      0.66       777
+           OTRAS       0.54      0.60      0.56       761
+
+        accuracy                           0.61      3135
+       macro avg       0.61      0.61      0.61      3135
+    weighted avg       0.61      0.61      0.61      3135
+
+
+##############################################################################
+ESCENARIO 3 - MLP RANDOMIZED SEARCH
+##############################################################################
+20 configuraciones x 3 folds = aprox. 60 fits
+La busqueda usa SOLO TRAIN.
+Scoring: f1_macro.
+Cada candidato usa early stopping dentro de su fold de entrenamiento.
+
+Comienza RandomizedSearchCV...
+
+==============================================================================
+MEJOR CONFIGURACION ENCONTRADA
+==============================================================================
+Mejor F1 macro promedio CV: 0.6042
+Mejor indice              : 13
+  activation             = relu
+  alpha                  = 0.001
+  batch_size             = 32
+  hidden_layer_sizes     = (128,)
+  learning_rate_init     = 0.0003
+  n_iter_no_change       = 10
+
+==============================================================================
+RESULTADOS - MLP RandomizedSearch
+==============================================================================
+
+  --- TRAIN ---
+  Accuracy         : 0.6947
+  Precision (macro): 0.6981
+  Recall (macro)   : 0.6937
+  F1 (macro)       : 0.6931
+  Log Loss         : 0.7557
+
+  --- VALIDACION ---
+  Accuracy         : 0.6118
+  Precision (macro): 0.6173
+  Recall (macro)   : 0.6108
+  F1 (macro)       : 0.6111
+  Log Loss         : 0.8939
+
+  Chequeo train vs validacion:
+  F1 train         : 0.6931
+  F1 validacion    : 0.6111
+  Diferencia       : 0.0820
+  Epocas ejecutadas: 27
+  Tiempo           : 479.91 segundos
+  -> Posible OVERFITTING.
+  Mejor accuracy de validacion INTERNA: 0.6405
+  Esa validacion interna sale SOLO de TRAIN.
+
+  Reporte por clase - VALIDACION:
+                  precision    recall  f1-score   support
+
+      ARMA_FUEGO       0.66      0.53      0.58       769
+     ARMA_BLANCA       0.61      0.66      0.63       828
+ARMA_CONTUNDENTE       0.67      0.63      0.65       777
+           OTRAS       0.54      0.63      0.58       761
+
+        accuracy                           0.61      3135
+       macro avg       0.62      0.61      0.61      3135
+    weighted avg       0.62      0.61      0.61      3135
+
+
+##############################################################################
+COMPARACION FINAL - 3 ESCENARIOS MLP
+##############################################################################
+              modelo  accuracy_train  f1_train  accuracy_val  precision_macro_val  recall_macro_val  f1_macro_val  log_loss_val  gap_f1_train_val  epocas  tiempo_segundos
+MLP RandomizedSearch          0.6947    0.6931        0.6118               0.6173            0.6108        0.6111        0.8939            0.0820      27         479.9074
+          MLP Manual          0.7290    0.7285        0.6096               0.6122            0.6090        0.6092        0.9212            0.1193      35           9.1480
+         MLP Default          0.9621    0.9620        0.5990               0.5985            0.5988        0.5985        1.9144            0.3635     200          30.3722
+
+GANADOR EN VALIDACION: MLP RandomizedSearch
+F1 macro validacion : 0.6111
+Guardado             : modelos/mlp_mejor.joblib
+
+IMPORTANTE:
+  TEST NO fue utilizado para escoger este ganador.
+  La comparacion definitiva con los otros algoritmos debe mantener TEST sellado hasta la etapa final.
+
+##############################################################################
+FIN - MODELO MLP
+##############################################################################
+Guardado: modelos/mlp_01_default.joblib
+Guardado: modelos/mlp_02_manual.joblib
+Guardado: modelos/mlp_03_search.joblib
+Guardado: modelos/mlp_mejor.joblib
+Guardado: resultados/modelos/comparacion_mlp_3_escenarios.csv

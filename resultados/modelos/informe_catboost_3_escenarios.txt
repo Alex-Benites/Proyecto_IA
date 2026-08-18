@@ -1,0 +1,224 @@
+
+##############################################################################
+CATBOOST - 3 ESCENARIOS
+##############################################################################
+Python 3.13.7 | scikit-learn 1.9.0 | catboost 1.2.10 | semilla 42
+
+==============================================================================
+CARGA DE DATOS
+==============================================================================
+Fuente: train_raw.csv / val_raw.csv
+Train: (14630, 19) | Val: (3135, 19)
+Columnas categoricas: 17
+Columnas numericas: ['edad', 'es_fin_semana']
+edad: 410 NaN train, 108 NaN val -> mediana train=30.0
+No se escala.
+Las categoricas se entregan a CatBoost como texto.
+TEST NO SE CARGA.
+
+##############################################################################
+ESCENARIO 1 - CATBOOST DEFAULT
+##############################################################################
+
+==============================================================================
+PARAMETROS EFECTIVOS - DEFAULT
+==============================================================================
+  iterations           = 1000
+  learning_rate        = 0.09072999656200408
+  depth                = 6
+  l2_leaf_reg          = 3
+  random_strength      = 1
+  bootstrap_type       = Bayesian
+  bagging_temperature  = 1
+  border_count         = 254
+  loss_function        = MultiClass
+  grow_policy          = SymmetricTree
+  random_seed          = 42
+
+==============================================================================
+RESULTADOS - CatBoost Default
+==============================================================================
+
+  --- TRAIN ---
+  Accuracy         : 0.7239
+  Precision (macro): 0.7244
+  Recall (macro)   : 0.7234
+  F1 (macro)       : 0.7234
+  Log Loss         : 0.6994
+
+  --- VALIDACION ---
+  Accuracy         : 0.6290
+  Precision (macro): 0.6297
+  Recall (macro)   : 0.6278
+  F1 (macro)       : 0.6276
+  Log Loss         : 0.8543
+
+  Brecha F1 train-val: 0.0959
+  Tiempo: 233.57 s
+  -> Posible OVERFITTING.
+
+Reporte por clase - VALIDACION:
+                  precision    recall  f1-score   support
+
+      ARMA_FUEGO       0.65      0.56      0.60       769
+     ARMA_BLANCA       0.63      0.68      0.65       828
+ARMA_CONTUNDENTE       0.67      0.69      0.68       777
+           OTRAS       0.57      0.59      0.58       761
+
+        accuracy                           0.63      3135
+       macro avg       0.63      0.63      0.63      3135
+    weighted avg       0.63      0.63      0.63      3135
+
+
+##############################################################################
+ESCENARIO 2 - CATBOOST AJUSTE MANUAL
+##############################################################################
+
+==============================================================================
+PARAMETROS MANUALES
+==============================================================================
+  iterations           = 800
+  learning_rate        = 0.05
+  depth                = 5
+  l2_leaf_reg          = 6.0
+  random_strength      = 1.5
+  bootstrap_type       = Bayesian
+  bagging_temperature  = 1.5
+  border_count         = 128
+  loss_function        = MultiClass
+  random_seed          = 42
+
+==============================================================================
+RESULTADOS - CatBoost Manual
+==============================================================================
+
+  --- TRAIN ---
+  Accuracy         : 0.6684
+  Precision (macro): 0.6684
+  Recall (macro)   : 0.6674
+  F1 (macro)       : 0.6672
+  Log Loss         : 0.8056
+
+  --- VALIDACION ---
+  Accuracy         : 0.6230
+  Precision (macro): 0.6230
+  Recall (macro)   : 0.6215
+  F1 (macro)       : 0.6211
+  Log Loss         : 0.8762
+
+  Brecha F1 train-val: 0.0461
+  Tiempo: 128.71 s
+  -> Sin senal fuerte de over/underfitting.
+
+Reporte por clase - VALIDACION:
+                  precision    recall  f1-score   support
+
+      ARMA_FUEGO       0.64      0.55      0.59       769
+     ARMA_BLANCA       0.62      0.69      0.65       828
+ARMA_CONTUNDENTE       0.66      0.67      0.66       777
+           OTRAS       0.57      0.57      0.57       761
+
+        accuracy                           0.62      3135
+       macro avg       0.62      0.62      0.62      3135
+    weighted avg       0.62      0.62      0.62      3135
+
+
+##############################################################################
+ESCENARIO 3 - CATBOOST RANDOMIZED SEARCH
+##############################################################################
+20 configuraciones x 3 folds = aprox. 60 fits
+La busqueda usa SOLO TRAIN.
+Scoring: f1_macro.
+
+==============================================================================
+MEJORES HIPERPARAMETROS
+==============================================================================
+Mejor F1 macro promedio CV: 0.6224
+  bagging_temperature  = 0.0
+  border_count         = 32
+  depth                = 6
+  iterations           = 900
+  l2_leaf_reg          = 7.0
+  learning_rate        = 0.05
+  random_strength      = 0.5
+
+==============================================================================
+RESULTADOS - CatBoost RandomizedSearch
+==============================================================================
+
+  --- TRAIN ---
+  Accuracy         : 0.7917
+  Precision (macro): 0.7930
+  Recall (macro)   : 0.7919
+  F1 (macro)       : 0.7921
+  Log Loss         : 0.5958
+
+  --- VALIDACION ---
+  Accuracy         : 0.6421
+  Precision (macro): 0.6426
+  Recall (macro)   : 0.6409
+  F1 (macro)       : 0.6410
+  Log Loss         : 0.8403
+
+  Brecha F1 train-val: 0.1511
+  Tiempo: 13590.97 s
+  -> Posible OVERFITTING.
+
+Reporte por clase - VALIDACION:
+                  precision    recall  f1-score   support
+
+      ARMA_FUEGO       0.66      0.60      0.63       769
+     ARMA_BLANCA       0.63      0.69      0.66       828
+ARMA_CONTUNDENTE       0.68      0.68      0.68       777
+           OTRAS       0.59      0.58      0.59       761
+
+        accuracy                           0.64      3135
+       macro avg       0.64      0.64      0.64      3135
+    weighted avg       0.64      0.64      0.64      3135
+
+
+##############################################################################
+COMPARACION FINAL - CATBOOST
+##############################################################################
+                   modelo  accuracy_train  f1_train  accuracy_val  precision_macro_val  recall_macro_val  f1_macro_val  log_loss_val  gap_f1_train_val  tiempo_segundos
+CatBoost RandomizedSearch          0.7917    0.7921        0.6421               0.6426            0.6409        0.6410        0.8403            0.1511       13590.9682
+         CatBoost Default          0.7239    0.7234        0.6290               0.6297            0.6278        0.6276        0.8543            0.0959         233.5722
+          CatBoost Manual          0.6684    0.6672        0.6230               0.6230            0.6215        0.6211        0.8762            0.0461         128.7149
+
+GANADOR EN VALIDACION: CatBoost RandomizedSearch
+F1 macro validacion: 0.6410
+
+==============================================================================
+IMPORTANCIA DE VARIABLES - GANADOR
+==============================================================================
+                feature  importancia
+                    mes      36.2761
+presun_motiva_observada      17.1628
+                  lugar       8.9865
+    presunta_motivacion       7.0288
+                 canton       5.2139
+              provincia       4.8269
+         franja_horaria       3.3617
+                   zona       2.8254
+                   hora       2.1988
+                   sexo       2.0981
+                   edad       2.0479
+           nacionalidad       1.9293
+             dia_semana       1.8770
+             area_hecho       1.1421
+           estado_civil       0.9757
+                  etnia       0.9637
+           discapacidad       0.7751
+             tipo_lugar       0.2757
+          es_fin_semana       0.0344
+
+##############################################################################
+FIN
+##############################################################################
+TEST permanecio sellado.
+Guardado: modelos/catboost_01_default.joblib
+Guardado: modelos/catboost_02_manual.joblib
+Guardado: modelos/catboost_03_search.joblib
+Guardado: modelos/catboost_mejor.joblib
+Guardado: modelos/catboost_mejor.cbm
+Guardado: resultados/modelos/comparacion_catboost_3_escenarios.csv
