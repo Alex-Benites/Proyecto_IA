@@ -1,14 +1,4 @@
-"""
-CATBOOST - 3 ESCENARIOS
-=======================
-1) Default
-2) Ajuste manual
-3) RandomizedSearchCV
 
-Usa train_raw.csv y val_raw.csv generados por 03_preparacion.py.
-CatBoost recibe las categoricas de forma nativa.
-TEST no se utiliza aqui.
-"""
 
 import sys
 import time
@@ -50,6 +40,13 @@ DIR_REP.mkdir(parents=True, exist_ok=True)
 TARGET = "y"
 CLASES = ["ARMA_FUEGO", "ARMA_BLANCA", "ARMA_CONTUNDENTE", "OTRAS"]
 
+COLUMNAS_EXCLUIR = [
+    "arma_categoria"  # Leakage: contiene información directa del objetivo
+    #"fecha",           # Sesgo temporal
+    #"anio",            # Sesgo temporal
+    #"mes",             # Sesgo temporal
+]
+
 # Todo excepto estas columnas se trata como categorico.
 COLS_NUMERICAS = ["edad", "es_fin_semana"]
 
@@ -85,36 +82,147 @@ rep = Reporte(DIR_REP / "informe_catboost_3_escenarios.txt")
 
 
 def cargar_datos():
-    ruta_train = DIR_PROC / "train_raw.csv"
-    ruta_val = DIR_PROC / "val_raw.csv"
+    ruta_train = DIR_PROC / "train_final_raw.csv"
+    ruta_val = DIR_PROC / "val_final_raw.csv"
 
-    faltantes = [p for p in [ruta_train, ruta_val] if not p.exists()]
+    faltantes = [
+        p
+        for p in [ruta_train, ruta_val]
+        if not p.exists()
+    ]
+
     if faltantes:
         raise FileNotFoundError(
-            "Faltan archivos de Etapa 3:\n" +
-            "\n".join(str(x) for x in faltantes)
+            "Faltan archivos de Etapa 3:\n"
+            + "\n".join(str(x) for x in faltantes)
         )
 
     train = pd.read_csv(ruta_train)
     val = pd.read_csv(ruta_val)
 
     if TARGET not in train.columns or TARGET not in val.columns:
-        raise ValueError("Los raw deben contener la columna 'y'.")
+        raise ValueError(
+            "Los raw deben contener la columna 'y'."
+        )
 
-    X_train = train.drop(columns=[TARGET]).copy()
-    y_train = train[TARGET].astype(str)
-    X_val = val.drop(columns=[TARGET]).copy()
-    y_val = val[TARGET].astype(str)
+    # =====================================================================
+    # MOSTRAR COLUMNAS QUE SE EXCLUIRÁN
+    # =====================================================================
+
+    presentes_train = [
+        columna
+        for columna in COLUMNAS_EXCLUIR
+        if columna in train.columns
+    ]
+
+    presentes_val = [
+        columna
+        for columna in COLUMNAS_EXCLUIR
+        if columna in val.columns
+    ]
+
+    rep.p(
+        "Columnas excluidas del entrenamiento:"
+    )
+
+    for columna in COLUMNAS_EXCLUIR:
+        rep.p(f"  - {columna}")
+
+    # =====================================================================
+    # SEPARAR X E y
+    #
+    # Se elimina:
+    #   - TARGET = y
+    #   - arma_categoria
+    #   - fecha
+    #   - anio
+    #   - mes
+    # =====================================================================
+
+    columnas_eliminar = [
+        TARGET,
+        *COLUMNAS_EXCLUIR,
+    ]
+
+    X_train = train.drop(
+        columns=columnas_eliminar,
+        errors="ignore",
+    ).copy()
+
+    y_train = train[
+        TARGET
+    ].astype(str)
+
+    X_val = val.drop(
+        columns=columnas_eliminar,
+        errors="ignore",
+    ).copy()
+
+    y_val = val[
+        TARGET
+    ].astype(str)
+
+    # =====================================================================
+    # VALIDAR QUE LAS COLUMNAS EXCLUIDAS REALMENTE NO ESTÉN EN X
+    # =====================================================================
+
+    for columna in COLUMNAS_EXCLUIR:
+
+        if columna in X_train.columns:
+            raise RuntimeError(
+                f"La columna '{columna}' "
+                f"continúa presente en X_train."
+            )
+
+        if columna in X_val.columns:
+            raise RuntimeError(
+                f"La columna '{columna}' "
+                f"continúa presente en X_val."
+            )
+
+    # =====================================================================
+    # VALIDAR QUE TRAIN Y VALIDATION TENGAN LAS MISMAS FEATURES
+    # =====================================================================
 
     if list(X_train.columns) != list(X_val.columns):
-        raise ValueError("Las features de train y val no coinciden.")
+        raise ValueError(
+            "Las features de train y val no coinciden."
+        )
 
-    desconocidas = sorted((set(y_train) | set(y_val)) - set(CLASES))
+    desconocidas = sorted(
+        (set(y_train) | set(y_val))
+        - set(CLASES)
+    )
+
     if desconocidas:
-        raise ValueError(f"Clases inesperadas: {desconocidas}")
+        raise ValueError(
+            f"Clases inesperadas: {desconocidas}"
+        )
 
-    return X_train, y_train, X_val, y_val
+    # =====================================================================
+    # INFORMACIÓN
+    # =====================================================================
 
+    rep.p(
+        f"Features utilizadas para entrenamiento: "
+        f"{X_train.shape[1]}"
+    )
+
+    rep.p(
+        "Columnas finales:"
+    )
+
+    for columna in X_train.columns:
+        rep.p(
+            f"  + {columna}"
+        )
+
+    return (
+        X_train,
+        y_train,
+        X_val,
+        y_val,
+    )
 
 def preparar_catboost(X_train, X_val):
     X_train = X_train.copy()
@@ -320,6 +428,25 @@ def main():
     )
 
     X_train, y_train, X_val, y_val = cargar_datos()
+
+    rep.titulo("VARIABLES UTILIZADAS")
+
+    rep.p(
+        f"Total de variables: "
+        f"{X_train.shape[1]}"
+    )
+
+    for columna in X_train.columns:
+        rep.p(
+            f"  {columna}"
+        )
+
+    rep.p("\nVariables excluidas:")
+
+    for columna in COLUMNAS_EXCLUIR:
+        rep.p(
+            f"  {columna}"
+        )
 
     rep.titulo("CARGA DE DATOS")
     rep.p("Fuente: train_raw.csv / val_raw.csv")

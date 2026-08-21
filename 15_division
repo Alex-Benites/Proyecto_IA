@@ -1,0 +1,233 @@
+from pathlib import Path
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+
+
+# =============================================================================
+# CONFIGURACIÓN
+# =============================================================================
+
+BASE = Path(__file__).resolve().parent
+
+RUTA_DATASET = (
+    BASE
+    / "data"
+    / "processed"
+    / "A_2014_2025_muestraFinal.xls"
+)
+
+DIR_SALIDA = (
+    BASE
+    / "data"
+    / "processed"
+)
+
+TARGET = "y"
+
+SEMILLA = 42
+
+
+# =============================================================================
+# CARGAR DATASET
+# =============================================================================
+
+print("=" * 70)
+print("DIVISIÓN FINAL 80 / 10 / 10")
+print("=" * 70)
+
+if not RUTA_DATASET.exists():
+    raise FileNotFoundError(
+        f"No existe el dataset:\n{RUTA_DATASET}"
+    )
+
+df = pd.read_excel(
+    RUTA_DATASET
+)
+
+print(
+    f"\nDataset original: {df.shape}"
+)
+
+if TARGET not in df.columns:
+    raise ValueError(
+        f"No existe la columna objetivo '{TARGET}'."
+    )
+
+
+# =============================================================================
+# LIMPIEZA BÁSICA DEL TARGET
+# =============================================================================
+
+df[TARGET] = (
+    df[TARGET]
+    .astype(str)
+    .str.strip()
+)
+
+
+# =============================================================================
+# DISTRIBUCIÓN ORIGINAL
+# =============================================================================
+
+print("\nDistribución original:")
+print(
+    df[TARGET].value_counts()
+)
+
+
+# =============================================================================
+# PRIMER SPLIT
+#
+# 80% TRAIN
+# 20% TEMPORAL
+# =============================================================================
+
+train, temporal = train_test_split(
+    df,
+    test_size=0.20,
+    random_state=SEMILLA,
+    stratify=df[TARGET],
+)
+
+
+# =============================================================================
+# SEGUNDO SPLIT
+#
+# 20% temporal se divide:
+# 10% VALIDATION
+# 10% TEST
+# =============================================================================
+
+val, test = train_test_split(
+    temporal,
+    test_size=0.50,
+    random_state=SEMILLA,
+    stratify=temporal[TARGET],
+)
+
+
+# =============================================================================
+# REINICIAR ÍNDICES
+# =============================================================================
+
+train = train.reset_index(
+    drop=True
+)
+
+val = val.reset_index(
+    drop=True
+)
+
+test = test.reset_index(
+    drop=True
+)
+
+
+# =============================================================================
+# INFORMACIÓN
+# =============================================================================
+
+total = len(df)
+
+print("\n" + "=" * 70)
+print("RESULTADO DEL SPLIT")
+print("=" * 70)
+
+print(
+    f"\nTRAIN: {len(train)} "
+    f"({len(train) / total:.2%})"
+)
+
+print(
+    f"VAL  : {len(val)} "
+    f"({len(val) / total:.2%})"
+)
+
+print(
+    f"TEST : {len(test)} "
+    f"({len(test) / total:.2%})"
+)
+
+
+# =============================================================================
+# DISTRIBUCIÓN POR CLASE
+# =============================================================================
+
+print("\n" + "=" * 70)
+print("TRAIN")
+print("=" * 70)
+print(
+    train[TARGET].value_counts()
+)
+
+print("\n" + "=" * 70)
+print("VALIDATION")
+print("=" * 70)
+print(
+    val[TARGET].value_counts()
+)
+
+print("\n" + "=" * 70)
+print("TEST")
+print("=" * 70)
+print(
+    test[TARGET].value_counts()
+)
+
+
+# =============================================================================
+# GUARDAR
+# =============================================================================
+
+ruta_train = (
+    DIR_SALIDA
+    / "train_final_raw.csv"
+)
+
+ruta_val = (
+    DIR_SALIDA
+    / "val_final_raw.csv"
+)
+
+ruta_test = (
+    DIR_SALIDA
+    / "test_final_raw.csv"
+)
+
+train.to_csv(
+    ruta_train,
+    index=False
+)
+
+val.to_csv(
+    ruta_val,
+    index=False
+)
+
+test.to_csv(
+    ruta_test,
+    index=False
+)
+
+
+print("\n" + "=" * 70)
+print("ARCHIVOS GENERADOS")
+print("=" * 70)
+
+print(
+    f"TRAIN:\n{ruta_train}"
+)
+
+print(
+    f"\nVALIDATION:\n{ruta_val}"
+)
+
+print(
+    f"\nTEST:\n{ruta_test}"
+)
+
+print(
+    "\nTEST queda SELLADO hasta "
+    "la evaluación final."
+)

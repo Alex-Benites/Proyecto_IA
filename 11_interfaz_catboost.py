@@ -1,10 +1,3 @@
-"""Interfaz web local para el CatBoost del escenario RandomizedSearch.
-
-Ejecute: py 11_interfaz_catboost.py
-Se abrirá el navegador. Detenga el servidor con Ctrl+C.
-No usa Flask, Streamlit ni otro framework web.
-"""
-
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from threading import Lock, Thread, Timer
@@ -20,8 +13,7 @@ RUTA_MODELO = BASE / "modelos" / "catboost_03_search.joblib"
 RUTA_TRAIN = BASE / "data" / "processed" / "train_raw.csv"
 TARGET = "y"
 NUMERICAS = {"edad", "es_fin_semana"}
-# Estos campos pueden recibir una categoría nueva. Los valores del train se
-# muestran como sugerencias, pero no limitan lo que el usuario puede escribir.
+
 CATEGORICAS_ABIERTAS = {"provincia", "canton", "lugar", "nacionalidad"}
 
 ETIQUETAS = {
@@ -176,10 +168,7 @@ def main():
     except ImportError:
         output = None
 
-    # En Colab, localhost pertenece a la máquina remota. El proxy oficial de
-    # Colab presenta el puerto dentro de una salida del notebook.
     if output is not None:
-        print("Mostrando la interfaz dentro de Google Colab.\n")
         Thread(target=servidor.serve_forever, daemon=True).start()
         output.serve_kernel_port_as_iframe(
             servidor.server_address[1], width="100%", height="1100"

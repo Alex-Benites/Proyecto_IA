@@ -3,15 +3,76 @@
 CATBOOST - 3 ESCENARIOS
 ##############################################################################
 Python 3.13.7 | scikit-learn 1.9.0 | catboost 1.2.10 | semilla 42
+Columnas excluidas del entrenamiento:
+  - arma_categoria
+  - fecha
+  - anio
+  - mes
+Features utilizadas para entrenamiento: 22
+Columnas finales:
+  + zona
+  + subzona
+  + distrito
+  + provincia
+  + canton
+  + coordenada_y
+  + coordenada_x
+  + area_hecho
+  + lugar
+  + tipo_lugar
+  + presunta_motivacion
+  + presun_motiva_observada
+  + edad
+  + sexo
+  + etnia
+  + estado_civil
+  + nacionalidad
+  + discapacidad
+  + dia_semana
+  + es_fin_semana
+  + hora
+  + franja_horaria
+
+==============================================================================
+VARIABLES UTILIZADAS
+==============================================================================
+Total de variables: 22
+  zona
+  subzona
+  distrito
+  provincia
+  canton
+  coordenada_y
+  coordenada_x
+  area_hecho
+  lugar
+  tipo_lugar
+  presunta_motivacion
+  presun_motiva_observada
+  edad
+  sexo
+  etnia
+  estado_civil
+  nacionalidad
+  discapacidad
+  dia_semana
+  es_fin_semana
+  hora
+  franja_horaria
+
+Variables excluidas:
+  arma_categoria
+  fecha
+  anio
+  mes
 
 ==============================================================================
 CARGA DE DATOS
 ==============================================================================
 Fuente: train_raw.csv / val_raw.csv
-Train: (14630, 19) | Val: (3135, 19)
-Columnas categoricas: 17
+Train: (3100, 22) | Val: (387, 22)
+Columnas categoricas: 20
 Columnas numericas: ['edad', 'es_fin_semana']
-edad: 410 NaN train, 108 NaN val -> mediana train=30.0
 No se escala.
 Las categoricas se entregan a CatBoost como texto.
 TEST NO SE CARGA.
@@ -24,7 +85,7 @@ ESCENARIO 1 - CATBOOST DEFAULT
 PARAMETROS EFECTIVOS - DEFAULT
 ==============================================================================
   iterations           = 1000
-  learning_rate        = 0.09072999656200408
+  learning_rate        = 0.08382699638605118
   depth                = 6
   l2_leaf_reg          = 3
   random_strength      = 1
@@ -40,34 +101,34 @@ RESULTADOS - CatBoost Default
 ==============================================================================
 
   --- TRAIN ---
-  Accuracy         : 0.7239
-  Precision (macro): 0.7244
-  Recall (macro)   : 0.7234
-  F1 (macro)       : 0.7234
-  Log Loss         : 0.6994
+  Accuracy         : 0.9503
+  Precision (macro): 0.9523
+  Recall (macro)   : 0.9463
+  F1 (macro)       : 0.9473
+  Log Loss         : 0.2696
 
   --- VALIDACION ---
-  Accuracy         : 0.6290
-  Precision (macro): 0.6297
-  Recall (macro)   : 0.6278
-  F1 (macro)       : 0.6276
-  Log Loss         : 0.8543
+  Accuracy         : 0.6124
+  Precision (macro): 0.6037
+  Recall (macro)   : 0.6116
+  F1 (macro)       : 0.6027
+  Log Loss         : 0.8991
 
-  Brecha F1 train-val: 0.0959
-  Tiempo: 233.57 s
+  Brecha F1 train-val: 0.3446
+  Tiempo: 104.49 s
   -> Posible OVERFITTING.
 
 Reporte por clase - VALIDACION:
                   precision    recall  f1-score   support
 
-      ARMA_FUEGO       0.65      0.56      0.60       769
-     ARMA_BLANCA       0.63      0.68      0.65       828
-ARMA_CONTUNDENTE       0.67      0.69      0.68       777
-           OTRAS       0.57      0.59      0.58       761
+      ARMA_FUEGO       0.68      0.88      0.77       100
+     ARMA_BLANCA       0.48      0.41      0.44       100
+ARMA_CONTUNDENTE       0.58      0.59      0.58        87
+           OTRAS       0.67      0.57      0.62       100
 
-        accuracy                           0.63      3135
-       macro avg       0.63      0.63      0.63      3135
-    weighted avg       0.63      0.63      0.63      3135
+        accuracy                           0.61       387
+       macro avg       0.60      0.61      0.60       387
+    weighted avg       0.60      0.61      0.60       387
 
 
 ##############################################################################
@@ -93,34 +154,34 @@ RESULTADOS - CatBoost Manual
 ==============================================================================
 
   --- TRAIN ---
-  Accuracy         : 0.6684
-  Precision (macro): 0.6684
-  Recall (macro)   : 0.6674
-  F1 (macro)       : 0.6672
-  Log Loss         : 0.8056
+  Accuracy         : 0.9142
+  Precision (macro): 0.9174
+  Recall (macro)   : 0.9080
+  F1 (macro)       : 0.9079
+  Log Loss         : 0.4155
 
   --- VALIDACION ---
-  Accuracy         : 0.6230
-  Precision (macro): 0.6230
-  Recall (macro)   : 0.6215
-  F1 (macro)       : 0.6211
-  Log Loss         : 0.8762
+  Accuracy         : 0.6176
+  Precision (macro): 0.6165
+  Recall (macro)   : 0.6177
+  F1 (macro)       : 0.6105
+  Log Loss         : 0.9180
 
-  Brecha F1 train-val: 0.0461
-  Tiempo: 128.71 s
-  -> Sin senal fuerte de over/underfitting.
+  Brecha F1 train-val: 0.2974
+  Tiempo: 56.52 s
+  -> Posible OVERFITTING.
 
 Reporte por clase - VALIDACION:
                   precision    recall  f1-score   support
 
-      ARMA_FUEGO       0.64      0.55      0.59       769
-     ARMA_BLANCA       0.62      0.69      0.65       828
-ARMA_CONTUNDENTE       0.66      0.67      0.66       777
-           OTRAS       0.57      0.57      0.57       761
+      ARMA_FUEGO       0.68      0.87      0.76       100
+     ARMA_BLANCA       0.47      0.43      0.45       100
+ARMA_CONTUNDENTE       0.58      0.62      0.60        87
+           OTRAS       0.73      0.55      0.63       100
 
-        accuracy                           0.62      3135
-       macro avg       0.62      0.62      0.62      3135
-    weighted avg       0.62      0.62      0.62      3135
+        accuracy                           0.62       387
+       macro avg       0.62      0.62      0.61       387
+    weighted avg       0.62      0.62      0.61       387
 
 
 ##############################################################################
@@ -133,13 +194,13 @@ Scoring: f1_macro.
 ==============================================================================
 MEJORES HIPERPARAMETROS
 ==============================================================================
-Mejor F1 macro promedio CV: 0.6224
-  bagging_temperature  = 0.0
-  border_count         = 32
-  depth                = 6
-  iterations           = 900
-  l2_leaf_reg          = 7.0
-  learning_rate        = 0.05
+Mejor F1 macro promedio CV: 0.5356
+  bagging_temperature  = 0.5
+  border_count         = 64
+  depth                = 4
+  iterations           = 500
+  l2_leaf_reg          = 5.0
+  learning_rate        = 0.1
   random_strength      = 0.5
 
 ==============================================================================
@@ -147,70 +208,73 @@ RESULTADOS - CatBoost RandomizedSearch
 ==============================================================================
 
   --- TRAIN ---
-  Accuracy         : 0.7917
-  Precision (macro): 0.7930
-  Recall (macro)   : 0.7919
-  F1 (macro)       : 0.7921
-  Log Loss         : 0.5958
+  Accuracy         : 0.9377
+  Precision (macro): 0.9399
+  Recall (macro)   : 0.9335
+  F1 (macro)       : 0.9345
+  Log Loss         : 0.3484
 
   --- VALIDACION ---
-  Accuracy         : 0.6421
-  Precision (macro): 0.6426
-  Recall (macro)   : 0.6409
-  F1 (macro)       : 0.6410
-  Log Loss         : 0.8403
+  Accuracy         : 0.6047
+  Precision (macro): 0.6142
+  Recall (macro)   : 0.6059
+  F1 (macro)       : 0.5968
+  Log Loss         : 0.9120
 
-  Brecha F1 train-val: 0.1511
-  Tiempo: 13590.97 s
+  Brecha F1 train-val: 0.3377
+  Tiempo: 5787.49 s
   -> Posible OVERFITTING.
 
 Reporte por clase - VALIDACION:
                   precision    recall  f1-score   support
 
-      ARMA_FUEGO       0.66      0.60      0.63       769
-     ARMA_BLANCA       0.63      0.69      0.66       828
-ARMA_CONTUNDENTE       0.68      0.68      0.68       777
-           OTRAS       0.59      0.58      0.59       761
+      ARMA_FUEGO       0.69      0.87      0.77       100
+     ARMA_BLANCA       0.47      0.44      0.45       100
+ARMA_CONTUNDENTE       0.53      0.64      0.58        87
+           OTRAS       0.77      0.47      0.58       100
 
-        accuracy                           0.64      3135
-       macro avg       0.64      0.64      0.64      3135
-    weighted avg       0.64      0.64      0.64      3135
+        accuracy                           0.60       387
+       macro avg       0.61      0.61      0.60       387
+    weighted avg       0.62      0.60      0.60       387
 
 
 ##############################################################################
 COMPARACION FINAL - CATBOOST
 ##############################################################################
                    modelo  accuracy_train  f1_train  accuracy_val  precision_macro_val  recall_macro_val  f1_macro_val  log_loss_val  gap_f1_train_val  tiempo_segundos
-CatBoost RandomizedSearch          0.7917    0.7921        0.6421               0.6426            0.6409        0.6410        0.8403            0.1511       13590.9682
-         CatBoost Default          0.7239    0.7234        0.6290               0.6297            0.6278        0.6276        0.8543            0.0959         233.5722
-          CatBoost Manual          0.6684    0.6672        0.6230               0.6230            0.6215        0.6211        0.8762            0.0461         128.7149
+          CatBoost Manual          0.9142    0.9079        0.6176               0.6165            0.6177        0.6105        0.9180            0.2974          56.5184
+         CatBoost Default          0.9503    0.9473        0.6124               0.6037            0.6116        0.6027        0.8991            0.3446         104.4859
+CatBoost RandomizedSearch          0.9377    0.9345        0.6047               0.6142            0.6059        0.5968        0.9120            0.3377        5787.4889
 
-GANADOR EN VALIDACION: CatBoost RandomizedSearch
-F1 macro validacion: 0.6410
+GANADOR EN VALIDACION: CatBoost Manual
+F1 macro validacion: 0.6105
 
 ==============================================================================
 IMPORTANCIA DE VARIABLES - GANADOR
 ==============================================================================
                 feature  importancia
-                    mes      36.2761
-presun_motiva_observada      17.1628
-                  lugar       8.9865
-    presunta_motivacion       7.0288
-                 canton       5.2139
-              provincia       4.8269
-         franja_horaria       3.3617
-                   zona       2.8254
-                   hora       2.1988
-                   sexo       2.0981
-                   edad       2.0479
-           nacionalidad       1.9293
-             dia_semana       1.8770
-             area_hecho       1.1421
-           estado_civil       0.9757
-                  etnia       0.9637
-           discapacidad       0.7751
-             tipo_lugar       0.2757
-          es_fin_semana       0.0344
+presun_motiva_observada      17.9494
+                  lugar      16.9265
+    presunta_motivacion       9.9984
+         franja_horaria       5.5873
+               distrito       5.3426
+                   hora       4.7474
+           coordenada_y       4.7209
+                   zona       4.6865
+                   edad       4.5475
+             dia_semana       3.8662
+                 canton       3.5275
+              provincia       3.4922
+                subzona       3.3680
+           estado_civil       2.6305
+                  etnia       2.1352
+             area_hecho       1.7052
+           discapacidad       1.3986
+           nacionalidad       1.3238
+           coordenada_x       1.0585
+                   sexo       0.5134
+          es_fin_semana       0.2932
+             tipo_lugar       0.1814
 
 ##############################################################################
 FIN
